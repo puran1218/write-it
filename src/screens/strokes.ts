@@ -1,9 +1,10 @@
-/** 笔顺演示 — port of StrokeScreenView + StrokePlaybackEngine. */
+/** 笔顺演示 — hanzi-writer 逐笔播放，保住 iOS 版的状态文案与墨点庆祝。 */
 
-import { lookup } from "../data";
-import { goBack } from "../router";
+import { loadStrokeFile } from "../data";
+import { goBack, navigate } from "../router";
 import { esc, topBarHtml } from "../ui";
-import { celebrate, createStrokeScene, type StrokeScene } from "../components/stroke-view";
+import { celebrate, tianGridSvg } from "../components/stroke-view";
+import { createWriter } from "../components/writer";
 
 export async function renderStrokes(root: HTMLElement, character: string): Promise<void> {
   root.innerHTML = `
@@ -12,40 +13,45 @@ export async function renderStrokes(root: HTMLElement, character: string): Promi
       <div class="strokes-title-row"><span class="strokes-title">${esc(character)}</span></div>
       <div class="strokes-body">
         <div class="strokes-status" aria-live="polite">准备中…</div>
-        <div class="stroke-canvas-card"><div class="strokes-loading">加载中…</div></div>
-        <button class="play-button" data-action="play" disabled>▶ 演示笔顺</button>
+        <div class="stroke-canvas-card">
+          ${tianGridSvg()}
+          <div class="writer-target"></div>
+        </div>
+        <div class="strokes-actions">
+          <button class="action-button action-blue" data-action="play" disabled>▶ 演示笔顺</button>
+          <button class="action-button action-paper" data-action="practice" disabled>✏️ 练一练</button>
+        </div>
       </div>
     </div>`;
 
   root.querySelector('[data-action="back"]')?.addEventListener("click", goBack);
 
   const status = root.querySelector<HTMLElement>(".strokes-status")!;
-  const canvasCard = root.querySelector<HTMLElement>(".stroke-canvas-card")!;
+  const card = root.querySelector<HTMLElement>(".stroke-canvas-card")!;
+  const target = root.querySelector<HTMLElement>(".writer-target")!;
   const playButton = root.querySelector<HTMLButtonElement>('[data-action="play"]')!;
+  const practiceButton = root.querySelector<HTMLButtonElement>('[data-action="practice"]')!;
 
-  const info = await lookup(character);
-  const strokes = info.strokes;
-  if (strokes.length === 0) {
+  const data = await loadStrokeFile(character);
+  if (!data || data.strokes.length === 0 || !target.isConnected) {
     status.textContent = "这个字的笔顺还没收进来。";
     return;
   }
 
-  canvasCard.querySelector(".strokes-loading")?.remove();
-  const scene: StrokeScene = createStrokeScene(strokes);
-  canvasCard.appendChild(scene.el);
-
+  const writer = createWriter(target, character, data, target.clientWidth);
+  const total = data.strokes.length;
   let completed = 0;
   let playing = false;
 
   function updateStatus(): void {
     if (playing) {
-      status.textContent = `第 ${completed + 1} 笔，共 ${strokes.length} 笔`;
+      status.textContent = `第 ${completed + 1} 笔，共 ${total} 笔`;
       status.classList.remove("strokes-status-done");
-    } else if (completed >= strokes.length) {
+    } else if (completed >= total) {
       status.textContent = "写完啦！✨";
       status.classList.add("strokes-status-done");
     } else {
-      status.textContent = `准备好了吗？一共 ${strokes.length} 笔`;
+      status.textContent = `准备好了吗？一共 ${total} 笔`;
       status.classList.remove("strokes-status-done");
     }
   }
@@ -56,17 +62,17 @@ export async function renderStrokes(root: HTMLElement, character: string): Promi
     }
     playing = true;
     playButton.disabled = true;
+    practiceButton.disabled = true;
 
-    if (completed >= strokes.length) {
+    if (completed >= total) {
       completed = 0;
-      scene.reset();
-      updateStatus();
+      await writer.hideCharacter({ duration: 200 });
     }
 
-    for (; completed < strokes.length; completed += 1) {
+    for (; completed < total; completed += 1) {
       updateStatus();
-      await scene.playStroke(completed);
-      if (!scene.el.isConnected) {
+      await writer.animateStroke(completed);
+      if (!target.isConnected) {
         playing = false;
         return; // 用户已离开本页
       }
@@ -74,12 +80,15 @@ export async function renderStrokes(root: HTMLElement, character: string): Promi
 
     playing = false;
     updateStatus();
-    celebrate(canvasCard);
-    playButton.disabled = false;
+    celebrate(card);
     playButton.textContent = "↺ 再看一遍";
+    playButton.disabled = false;
+    practiceButton.disabled = false;
   }
 
   updateStatus();
   playButton.disabled = false;
+  practiceButton.disabled = false;
   playButton.addEventListener("click", () => void play());
+  practiceButton.addEventListener("click", () => navigate({ screen: "practice", character }));
 }

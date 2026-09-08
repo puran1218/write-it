@@ -5,6 +5,7 @@ import { navigate, onRouteChange, parseHash } from "./router";
 import { renderBook } from "./screens/book";
 import { renderDetail } from "./screens/detail";
 import { renderHome } from "./screens/home";
+import { renderPractice } from "./screens/practice";
 import { renderSearch } from "./screens/search";
 import { renderStrokes } from "./screens/strokes";
 
@@ -30,6 +31,9 @@ function render(): void {
       break;
     case "strokes":
       void renderStrokes(appRoot, route.character);
+      break;
+    case "practice":
+      void renderPractice(appRoot, route.character);
       break;
   }
 }

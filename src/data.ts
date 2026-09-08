@@ -84,6 +84,21 @@ function parseStrokes(file: RawStrokeFileShape): StrokeSegment[] {
   }));
 }
 
+export interface StrokeFile {
+  character: string;
+  strokes: string[];
+  medians?: number[][][];
+}
+
+/** 整份笔顺文件（hanzi-writer 的 charDataLoader 直接吃这个格式）。 */
+export async function loadStrokeFile(character: string): Promise<StrokeFile | null> {
+  try {
+    return await loadJson<StrokeFile>(`./data/strokes/${encodeURIComponent(character)}.json`);
+  } catch {
+    return null;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Lookup
 

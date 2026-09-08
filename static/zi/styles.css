@@ -699,18 +699,21 @@ button {
   padding: 4%;
 }
 
-.strokes-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--text-muted);
-}
-
-.zi-stroke-svg {
+/* hanzi-writer 挂载点叠在田字格参考线上层 */
+.writer-target {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
-  display: block;
+}
+
+.zi-tian-grid-svg {
+  position: absolute;
+  inset: 4%;
+  width: 92%;
+  height: 92%;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .zi-splatter-layer {
@@ -724,19 +727,13 @@ button {
   border-radius: 50%;
 }
 
-.play-button {
-  padding: 14px 0;
-  background: var(--sky-blue);
-  border: 2px solid var(--outline);
-  border-radius: 12px;
-  color: #fff;
-  font-size: 17px;
-  font-weight: 700;
-  text-shadow: 0 1px 0 rgba(42, 37, 32, 0.25);
+.strokes-actions {
+  display: flex;
+  gap: 10px;
 }
 
-.play-button:disabled {
-  opacity: 0.6;
+.action-paper {
+  background: #fff;
 }
 
 /* ------------------------------------------------------------------ 字本子 */
