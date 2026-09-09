@@ -4,6 +4,7 @@ import { LibraryStore } from "./library";
 import { navigate, onRouteChange, parseHash } from "./router";
 import { renderBook } from "./screens/book";
 import { renderDetail } from "./screens/detail";
+import { renderHandwrite } from "./screens/handwrite";
 import { renderHome } from "./screens/home";
 import { renderPractice } from "./screens/practice";
 import { renderSearch } from "./screens/search";
@@ -25,6 +26,9 @@ function render(): void {
       break;
     case "search":
       void renderSearch(appRoot);
+      break;
+    case "handwrite":
+      void renderHandwrite(appRoot);
       break;
     case "detail":
       void renderDetail(appRoot, route.character, library);
@@ -55,7 +59,14 @@ document.addEventListener("click", (event) => {
 });
 
 onRouteChange(render);
-render();
+
+// ?char=字 直达详情页（替代 iOS 版的 Siri/快捷指令入口）
+const directChar = new URLSearchParams(window.location.search).get("char");
+if (directChar && !window.location.hash) {
+  navigate({ screen: "detail", character: directChar });
+} else {
+  render();
+}
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {

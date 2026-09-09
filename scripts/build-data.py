@@ -100,6 +100,17 @@ def main() -> None:
     )
     dump(OUT_DIR / "curriculum.json", {"order": ordered})
 
+    # 6. Handwriting recognition index (522 chars, stroke median points) —
+    #    lazy-loaded on first use of the draw screen, runtime-cached by the SW
+    shutil.copyfile(
+        source / "Resources" / "handwrite_recognition_index.json",
+        OUT_DIR / "handwrite_index.json",
+    )
+    print(
+        f"  data/handwrite_index.json "
+        f"({(OUT_DIR / 'handwrite_index.json').stat().st_size / 1024 / 1024:.1f} MB)"
+    )
+
     # 6. Per-character stroke files (makemeahanzi SVG paths + medians), copied as-is
     strokes_out = OUT_DIR / "strokes"
     if strokes_out.exists():

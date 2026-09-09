@@ -10,8 +10,14 @@
 
 ## 功能
 
+- `说给我听`：Web Speech API（zh-CN）语音查字，2.2 秒静音自动结束；
+  浏览器不支持或拒绝权限时自动隐藏语音入口，文字/拼音输入始终兜底
+  （iOS 主屏 PWA 模式下的麦克风可用性需真机验证）
+- `画给我看`：手指在田字格画布上写，停笔 600ms 后离线识别——
+  移植 iOS `OfflineHandwriteRecognitionService` 的归一化 + 重采样 + 加权打分，
+  4.2MB 索引首次使用时才加载（之后由 Service Worker 缓存）；
+  没认出来就给"试试拼音输入"金色兜底
 - `查一查`：输入汉字或拼音前缀（如 `hua`），候选列表带声调拼音
-  （语音输入 `说给我听` 留到第四期，Web Speech API 在 iOS 主屏 PWA 里需真机验证）
 - `大字详情`：田字格超大字、标调拼音、释义、朗读（Web Speech zh-CN）
 - `笔顺演示`：[hanzi-writer](https://hanziwriter.org)（MIT）逐笔播放，
   淡底字轮廓 + 田字格参考线，状态文案与写完的墨点庆祝沿用 iOS 版
@@ -20,13 +26,15 @@
 - `字本子`：按课程顺序的贴纸货架（刚认识 / 常说常用 / 身边看到 / 继续探索），
   看过的字点亮成贴纸，收藏带 ♥，进度条统计
 - `今日一字`、`最近查过`（首页）
-- PWA：添加到主屏幕后全屏运行，离线可用（笔顺 JSON 按字缓存）
+- PWA：添加到主屏幕后全屏运行，离线可用（笔顺 JSON 与手写索引按需缓存）
 - 拼音一律转成标调形式显示（`sha4ng` → `shàng`，轻声 `men5` → `men`），
   比 iOS 版（去数字）对家长更友好
+- `?char=字` 直达详情页（替代 iOS 版的 Siri/快捷指令入口）
 
-相对 iOS 版的取舍：不做手写识别 `画给我看`（第三期）、不做语音识别
-`说给我听`（第四期）、不做触感反馈；练习判定由 hanzi-writer 承担
-（比 iOS 自研的 `StrokePracticeService` 多了方向判定与自动提示）。
+相对 iOS 版的取舍：不做触感反馈；练习判定由 hanzi-writer 承担
+（比 iOS 自研的 `StrokePracticeService` 多了方向判定与自动提示）；
+手写识别输入坐标在打分前先做 y 翻转对齐索引方向
+（iOS 版少了这一步，属于待回报上游的已知隐患）。
 
 ## 技术栈与目录结构
 
@@ -38,25 +46,29 @@ micro.blog 从 GitHub 拉取后原样发布 `static/`。
 plugin.json          micro.blog 插件清单
 scripts/build-data.py
                      从 iOS 仓库（../minimaxi）转换数据：SQLite 查字表、
-                     词语/例句/补充/课程 JSON、522 个笔顺 JSON（原样复制）
+                     词语/例句/补充/课程 JSON、522 个笔顺 JSON（原样复制）、
+                     手写识别索引（首次使用懒加载）
 src/
-  main.ts            路由分发 + Service Worker 注册
-  router.ts          hash 路由（#/、#/book、#/search、#/detail/字、
-                     #/strokes/字、#/practice/字）
+  main.ts            路由分发、?char= 直达、Service Worker 注册
+  router.ts          hash 路由（#/、#/book、#/search、#/handwrite、
+                     #/detail/字、#/strokes/字、#/practice/字）
   data.ts            数据加载、查字、拼音搜索、标调转换、课程分架
+  handwrite.ts       手写识别（OfflineHandwriteRecognitionService 的 TS 移植）
+  voice.ts           语音识别状态机（Web Speech API，2.2s 静音自动停）
   library.ts         字本子状态（localStorage，对应 LibraryStore）
   speech.ts          朗读（speechSynthesis zh-CN, rate 0.45）
-  types.ts           CharacterInfo / LibraryState 等数据形状
+  types.ts           CharacterInfo / LibraryState / HandwriteCandidate 等
   ui.ts              公共 DOM 小件
   components/
     writer.ts        hanzi-writer 实例工厂（主题色落地、charDataLoader 走本地数据）
     stroke-view.ts   田字格参考线 + 墨点庆祝
     mascot.ts        字宝宝吉祥物 SVG
-  screens/           home / search / detail / strokes / practice / book
+  screens/           home / search / handwrite / detail / strokes / practice / book
 static/zi/           可直接发布的成品（构建产物 + 数据，均已提交）
   index.html / styles.css / app.js / manifest.webmanifest / service-worker.js
   icons/             PWA 图标（取自 iOS App Icon）
-  data/              build-data.py 的产物（含 strokes/ 按字懒加载）
+  data/              build-data.py 的产物（strokes/ 按字懒加载，
+                     handwrite_index.json 进手写屏时才拉取）
 ```
 
 hanzi-writer 的数据与 iOS 版同源（都来自 Make Me a Hanzi / Arphic 授权），
@@ -96,9 +108,10 @@ HSKHSK 等第三方词表仅作研究参考，未打包。详见 iOS 仓库 READ
 ## 与 iOS 版的关系
 
 iOS 原版见 [minimaxi](../minimaxi/) 仓库（SwiftUI + SQLite.swift）。
-本插件是其 Web 移植版，分四期对齐 iOS 功能：
+本插件是其 Web 移植版，四期功能已全部对齐：
 
 1. ✅ 查字 → 大字详情 → 笔顺演示 → 字本子
 2. ✅ 练一练（hanzi-writer 描红测验，替代自研 `StrokePracticeService` 移植）
-3. ⬜ 画给我看（移植 `OfflineHandwriteRecognitionService`，索引懒加载）
-4. ⬜ 说给我听（Web Speech API + 降级输入，iOS 主屏 PWA 真机验证后定去留）
+3. ✅ 画给我看（`OfflineHandwriteRecognitionService` 移植 + 索引懒加载）
+4. ✅ 说给我听（Web Speech API，不支持/拒绝权限时文字兜底；
+   iOS 主屏 PWA 模式下的真机验证仍是遗留 QA 项）

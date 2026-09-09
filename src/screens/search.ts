@@ -1,16 +1,37 @@
-/** 查一查 — text/pinyin search (phase-1 twin of QuickSearchSheet). */
+/** 查一查 / 说给我听 — voice lookup + text/pinyin search (port of QuickSearchSheet). */
 
 import { displayPinyin, isChineseCharacter, lookup, searchByPinyin, searchTerm } from "../data";
 import type { CharacterPreview } from "../types";
 import { goBack, navigate } from "../router";
 import { esc, topBarHtml } from "../ui";
+import { VoiceLookup, voiceSupported, type VoiceLookupState } from "../voice";
+
+const VOICE_STATUS_TEXT: Record<VoiceLookupState, string> = {
+  idle: "点一下麦克风，说出想查的字",
+  listening: "在听啦…说吧",
+  "permission-denied": "需要允许麦克风才能听你说话，直接打字也可以。",
+  "no-speech": "刚刚没有听到清楚的内容，再试一次？",
+  failed: "现在暂时不能听你说话，打字也可以。",
+};
 
 export async function renderSearch(root: HTMLElement): Promise<void> {
+  const withVoice = voiceSupported();
   root.innerHTML = `
     <div class="screen">
       ${topBarHtml()}
       <div class="search-body">
-        <h1 class="search-heading">查一个字</h1>
+        <h1 class="search-heading">${withVoice ? "点一下，说出来，再选一个字" : "查一个字"}</h1>
+
+        ${
+          withVoice
+            ? `
+        <div class="voice-card">
+          <button class="voice-mic" data-action="voice" aria-label="说一个字">🎤</button>
+          <span class="voice-status" data-role="voice-status">${VOICE_STATUS_TEXT.idle}</span>
+        </div>
+        <p class="voice-caption">还可以自己输入</p>`
+            : ""
+        }
 
         <div class="search-input-row">
           <input class="search-input" type="text" inputmode="text"
@@ -25,11 +46,54 @@ export async function renderSearch(root: HTMLElement): Promise<void> {
       </div>
     </div>`;
 
+  root.querySelector('[data-action="back"]')?.addEventListener("click", goBack);
+
   const input = root.querySelector<HTMLInputElement>(".search-input")!;
   const message = root.querySelector<HTMLElement>(".search-message")!;
   const results = root.querySelector<HTMLElement>(".search-results")!;
 
-  root.querySelector('[data-action="back"]')?.addEventListener("click", goBack);
+  // ---------------------------------------------------------------- 语音输入
+
+  const voice = withVoice ? new VoiceLookup() : null;
+  let listening = false;
+
+  function setVoiceStatus(state: VoiceLookupState): void {
+    const statusEl = root.querySelector<HTMLElement>('[data-role="voice-status"]');
+    if (!statusEl) {
+      return;
+    }
+    statusEl.textContent = VOICE_STATUS_TEXT[state];
+    statusEl.classList.toggle("voice-status-listening", state === "listening");
+    root.querySelector(".voice-mic")?.classList.toggle("voice-mic-listening", state === "listening");
+  }
+
+  root.querySelector('[data-action="voice"]')?.addEventListener("click", () => {
+    if (!voice) {
+      return;
+    }
+    if (listening) {
+      listening = false;
+      voice.stop();
+      setVoiceStatus("idle");
+      return;
+    }
+    listening = true;
+    voice.start({
+      onTranscript: (transcript) => {
+        input.value = transcript;
+        void performSearch();
+      },
+      onState: (state) => {
+        setVoiceStatus(state);
+        if (state !== "listening") {
+          listening = false;
+        }
+      },
+    });
+  });
+
+  // ---------------------------------------------------------------- 文字查字
+
   root.querySelector('[data-action="clear"]')?.addEventListener("click", () => {
     input.value = "";
     results.innerHTML = "";
@@ -37,15 +101,13 @@ export async function renderSearch(root: HTMLElement): Promise<void> {
     input.focus();
   });
 
-  function showPreviews(previews: CharacterPreview[], pinyinList: string[]): void {
+  function showPreviews(previews: CharacterPreview[]): void {
     if (previews.length === 0) {
       results.innerHTML = "";
       message.textContent = "没找到这个字，换个说法试试？";
       return;
     }
-    message.textContent = pinyinList.includes("")
-      ? "找到啦，点一下看大字。"
-      : "找到啦，点一下看大字。";
+    message.textContent = "找到啦，点一下看大字。";
     results.innerHTML = previews
       .map(
         (preview) => `
@@ -74,7 +136,7 @@ export async function renderSearch(root: HTMLElement): Promise<void> {
     if (isChineseCharacter(focus)) {
       const info = await lookup(focus);
       if (info.pinyin && info.pinyin !== `${focus}0`) {
-        showPreviews([{ character: focus, pinyin: info.pinyin }], [""]);
+        showPreviews([{ character: focus, pinyin: info.pinyin }]);
         return;
       }
       results.innerHTML = "";
@@ -82,7 +144,7 @@ export async function renderSearch(root: HTMLElement): Promise<void> {
       return;
     }
 
-    showPreviews(await searchByPinyin(query), []);
+    showPreviews(await searchByPinyin(query));
   }
 
   let debounceTimer: number | undefined;

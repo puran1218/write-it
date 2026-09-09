@@ -1,5 +1,5 @@
 {
-  "version": "1.1",
+  "version": "1.2",
   "title": "字宝宝 Zi",
-  "description": "给孩子的查字、笔顺与描红小应用（PWA）：查一个字，看超大字、听读音、看笔顺、照着描红练一练，收进字本子。安装后访问 /zi/。Character lookup, stroke order animation and tracing practice for kids, as a static PWA page."
+  "description": "给孩子的查字与写字小应用（PWA）：说给我听、画给我看、大字详情、笔顺演示、描红练一练、字本子，全离线。安装后访问 /zi/。Speak, draw or type to find a Chinese character, watch stroke order and trace it — an offline static PWA for kids."
 }

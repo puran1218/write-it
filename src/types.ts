@@ -52,6 +52,13 @@ export interface LibraryState {
   favoriteCharacters: string[];
 }
 
+/** Ranked handwriting candidate — mirror of HandwriteCandidate.swift. */
+export interface HandwriteCandidate {
+  character: string;
+  score: number;
+  pinyin: string | null;
+}
+
 /** Lightweight result for search lists (no stroke data fetched). */
 export interface CharacterPreview {
   character: string;

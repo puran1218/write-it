@@ -313,6 +313,11 @@ button {
   flex: 1;
 }
 
+.top-bar-title {
+  font-size: 22px;
+  font-weight: 700;
+}
+
 .heart-button {
   font-size: 20px;
 }
@@ -734,6 +739,174 @@ button {
 
 .action-paper {
   background: #fff;
+}
+
+/* ------------------------------------------------------------------ 说给我听 */
+
+.voice-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1.6px solid rgba(42, 37, 32, 0.9);
+  border-radius: 18px;
+}
+
+.voice-mic {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--warm-gold);
+  border: 2px solid var(--outline);
+  font-size: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.voice-mic-listening {
+  background: var(--sky-blue);
+  animation: voice-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes voice-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+.voice-status {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.voice-status-listening {
+  color: var(--outline);
+  font-weight: 700;
+}
+
+.voice-caption {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin: 14px 0 10px;
+}
+
+/* ------------------------------------------------------------------ 画给我看 */
+
+.handwrite-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 20px 32px;
+}
+
+.handwrite-mascot-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.handwrite-card {
+  position: relative;
+  height: 360px;
+  background: #fff;
+  border: 2.5px solid var(--outline);
+  border-radius: var(--r-hero);
+  overflow: hidden;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.hw-grid {
+  inset: 6%;
+  width: 88%;
+  height: 88%;
+}
+
+.hw-ink {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.handwrite-message-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.handwrite-message {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.handwrite-clear {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--outline);
+  flex: none;
+}
+
+.handwrite-progress {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.handwrite-candidates {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 2px;
+}
+
+.handwrite-candidate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 72px;
+  height: 82px;
+  background: #fff;
+  border: 2px solid var(--outline);
+  border-radius: 16px;
+  flex: none;
+}
+
+.handwrite-candidate-first {
+  background: var(--sky-blue);
+}
+
+.candidate-char {
+  font-family: var(--font-hanzi);
+  font-size: 34px;
+  line-height: 1.1;
+}
+
+.candidate-pinyin {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.handwrite-fallback {
+  align-self: center;
+  padding: 12px 18px;
+  background: var(--warm-gold);
+  border: 2px solid var(--outline);
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 /* ------------------------------------------------------------------ 字本子 */

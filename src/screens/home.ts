@@ -21,20 +21,20 @@ export async function renderHome(root: HTMLElement, library: LibraryStore): Prom
       </header>
 
       <section class="hero-entry">
-        <div class="speech-bubble">想知道哪个字怎么写？打出来，我放大给你看。</div>
+        <div class="speech-bubble">想知道哪个字怎么写？说出来，或画给我看。</div>
         ${mascotSvg(78, "welcome", "var(--sky-blue)")}
       </section>
 
       <section class="entry-cards">
         <button class="entry-card entry-card-gold" data-nav="search">
-          <span class="entry-icon-circle">🔍</span>
-          <span class="entry-title">查一查</span>
-          <span class="entry-subtitle">打字或拼音</span>
+          <span class="entry-icon-circle">🎤</span>
+          <span class="entry-title">说给我听</span>
+          <span class="entry-subtitle">说一个字</span>
         </button>
-        <button class="entry-card entry-card-blue" data-nav="book">
-          <span class="entry-icon-circle">★</span>
-          <span class="entry-title">字本子</span>
-          <span class="entry-subtitle">我的贴纸册</span>
+        <button class="entry-card entry-card-blue" data-nav="handwrite">
+          <span class="entry-icon-circle">✎</span>
+          <span class="entry-title">画给我看</span>
+          <span class="entry-subtitle">手指写一写</span>
         </button>
       </section>
 
