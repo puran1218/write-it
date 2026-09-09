@@ -55,6 +55,8 @@ document.addEventListener("click", (event) => {
     navigate({ screen: "book" });
   } else if (destination === "search") {
     navigate({ screen: "search" });
+  } else if (destination === "handwrite") {
+    navigate({ screen: "handwrite" });
   }
 });
 

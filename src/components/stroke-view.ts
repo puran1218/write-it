@@ -9,7 +9,7 @@
 export function tianGridSvg(): string {
   return `
   <svg viewBox="0 0 1024 1024" class="zi-tian-grid-svg" aria-hidden="true">
-    <g stroke="var(--sky-blue)" stroke-width="4" fill="none">
+    <g style="stroke: var(--sky-blue)" stroke-width="4" fill="none">
       <rect x="20" y="20" width="984" height="984" stroke-dasharray="18 14"/>
       <path d="M 512 20 V 1004" stroke-dasharray="18 14"/>
       <path d="M 20 512 H 1004" stroke-dasharray="18 14"/>

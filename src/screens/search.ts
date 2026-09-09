@@ -124,7 +124,10 @@ export async function renderSearch(root: HTMLElement): Promise<void> {
     }
   }
 
+  let searchRunId = 0;
+
   async function performSearch(): Promise<void> {
+    const id = ++searchRunId;
     const query = input.value.trim();
     if (!query) {
       results.innerHTML = "";
@@ -135,6 +138,9 @@ export async function renderSearch(root: HTMLElement): Promise<void> {
     const focus = searchTerm(query);
     if (isChineseCharacter(focus)) {
       const info = await lookup(focus);
+      if (id !== searchRunId) {
+        return; // 已有更新的输入，丢弃旧结果
+      }
       if (info.pinyin && info.pinyin !== `${focus}0`) {
         showPreviews([{ character: focus, pinyin: info.pinyin }]);
         return;
@@ -144,7 +150,11 @@ export async function renderSearch(root: HTMLElement): Promise<void> {
       return;
     }
 
-    showPreviews(await searchByPinyin(query));
+    const previews = await searchByPinyin(query);
+    if (id !== searchRunId) {
+      return;
+    }
+    showPreviews(previews);
   }
 
   let debounceTimer: number | undefined;

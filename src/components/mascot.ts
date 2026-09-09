@@ -7,8 +7,8 @@ export function mascotSvg(size: number, mood: MascotMood, fillColor: string): st
     mood === "happy"
       ? `<path d="M36 48 q4 -5 8 0" class="zi-mascot-line"/>
          <path d="M56 48 q4 -5 8 0" class="zi-mascot-line"/>`
-      : `<circle cx="40" cy="48" r="3" fill="var(--outline)"/>
-         <circle cx="60" cy="48" r="3" fill="var(--outline)"/>`;
+      : `<circle cx="40" cy="48" r="3" style="fill: var(--outline)"/>
+         <circle cx="60" cy="48" r="3" style="fill: var(--outline)"/>`;
 
   const mouth =
     mood === "happy"
@@ -22,9 +22,9 @@ export function mascotSvg(size: number, mood: MascotMood, fillColor: string): st
       <path d="M82 66 q9 4 10 12" class="zi-mascot-arm"/>
       <path d="M50 10 q-7 -6 -2 -8" class="zi-mascot-arm" fill="none"/>
       <rect x="10" y="12" width="80" height="80" rx="20"
-            fill="${fillColor}" stroke="var(--outline)" stroke-width="2.5"/>
-      <circle cx="33" cy="56" r="4.5" fill="var(--mascot-cheek)"/>
-      <circle cx="67" cy="56" r="4.5" fill="var(--mascot-cheek)"/>
+            style="fill: ${fillColor}; stroke: var(--outline); stroke-width: 2.5px"/>
+      <circle cx="33" cy="56" r="4.5" style="fill: var(--mascot-cheek)"/>
+      <circle cx="67" cy="56" r="4.5" style="fill: var(--mascot-cheek)"/>
       ${eyes}
       ${mouth}
     </g>

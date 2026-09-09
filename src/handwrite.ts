@@ -31,12 +31,18 @@ const SAMPLE_COUNT = 20;
 let indexPromise: Promise<IndexEntry[]> | null = null;
 
 function loadIndex(): Promise<IndexEntry[]> {
-  indexPromise ??= fetch("./data/handwrite_index.json").then((response) => {
-    if (!response.ok) {
-      throw new Error(`handwrite index ${response.status}`);
-    }
-    return response.json() as Promise<IndexEntry[]>;
-  });
+  // 失败后清掉缓存的 promise，下一次画字时重试拉取
+  indexPromise ??= fetch("./data/handwrite_index.json")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`handwrite index ${response.status}`);
+      }
+      return response.json() as Promise<IndexEntry[]>;
+    })
+    .catch((error) => {
+      indexPromise = null;
+      throw error;
+    });
   return indexPromise;
 }
 

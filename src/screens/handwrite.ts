@@ -5,6 +5,7 @@ import { recognize, type HandwriteStroke, type StrokePoint } from "../handwrite"
 import { goBack, navigate } from "../router";
 import { esc } from "../ui";
 import { mascotSvg } from "../components/mascot";
+import { tianGridSvg } from "../components/stroke-view";
 
 const RECOGNIZE_IDLE_MS = 600;
 
@@ -24,15 +25,7 @@ export async function renderHandwrite(root: HTMLElement): Promise<void> {
         </div>
 
         <div class="handwrite-card" data-role="canvas">
-          <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="zi-tian-grid-svg hw-grid" aria-hidden="true">
-            <g stroke="var(--sky-blue)" stroke-width="1" fill="none" vector-effect="non-scaling-stroke">
-              <rect x="6" y="6" width="88" height="88" stroke-dasharray="4 3"/>
-              <path d="M 50 6 V 94" stroke-dasharray="4 3"/>
-              <path d="M 6 50 H 94" stroke-dasharray="4 3"/>
-              <path d="M 6 6 L 94 94" stroke-dasharray="4 3" opacity="0.6"/>
-              <path d="M 94 6 L 6 94" stroke-dasharray="4 3" opacity="0.6"/>
-            </g>
-          </svg>
+          ${tianGridSvg()}
           <svg class="hw-ink" data-role="ink"></svg>
         </div>
 
@@ -68,12 +61,7 @@ export async function renderHandwrite(root: HTMLElement): Promise<void> {
       stroke.map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" ");
     const all = [...strokes, ...(current.length > 0 ? [current] : [])];
     ink.setAttribute("viewBox", `0 0 ${canvasCard.clientWidth} ${canvasCard.clientHeight}`);
-    ink.innerHTML = all
-      .map(
-        (stroke) =>
-          `<polyline points="${toPoints(stroke)}" fill="none" stroke="var(--outline)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`
-      )
-      .join("");
+    ink.innerHTML = all.map((stroke) => `<polyline points="${toPoints(stroke)}"/>`).join("");
   }
 
   function setBubble(text: string): void {
