@@ -17,8 +17,10 @@
   移植 iOS `OfflineHandwriteRecognitionService` 的归一化 + 重采样 + 加权打分，
   4.2MB 索引首次使用时才加载（之后由 Service Worker 缓存）；
   没认出来就给"试试拼音输入"金色兜底
-- `查一查`：输入汉字或拼音前缀（如 `hua`），候选列表带声调拼音
-- `大字详情`：田字格超大字、标调拼音、释义、朗读（Web Speech zh-CN）
+- `查一查`：输入汉字或拼音前缀（如 `hua`），候选列表带声调拼音，
+  覆盖 9565 字（522 个课程字 + makemeahanzi 字典补全）
+- `大字详情`：田字格超大字、标调拼音、释义、部首、朗读（Web Speech zh-CN）；
+  笔顺/描红覆盖 hanzi-writer-data 全量 9574 字，「还没有笔顺」基本消失
 - `笔顺演示`：[hanzi-writer](https://hanziwriter.org)（MIT）逐笔播放，
   淡底字轮廓 + 田字格参考线，状态文案与写完的墨点庆祝沿用 iOS 版
 - `练一练`：hanzi-writer 描红测验——笔顺**和方向**判定、错两次出天蓝色
@@ -45,14 +47,14 @@ micro.blog 从 GitHub 拉取后原样发布 `static/`。
 ```text
 plugin.json          micro.blog 插件清单
 scripts/build-data.py
-                     从 iOS 仓库（../minimaxi）转换数据：SQLite 查字表、
-                     词语/例句/补充/课程 JSON、522 个笔顺 JSON（原样复制）、
-                     手写识别索引（首次使用懒加载）
+                     从 iOS 仓库（../minimaxi）转换数据：SQLite 查字表 + 字典
+                     补全、词语/例句/补充/课程 JSON、手写识别索引；
+                     笔顺取自 hanzi-writer-data（devDependency）全量单字文件
 src/
   main.ts            路由分发、?char= 直达、Service Worker 注册
   router.ts          hash 路由（#/、#/book、#/search、#/handwrite、
                      #/detail/字、#/strokes/字、#/practice/字）
-  data.ts            数据加载、查字、拼音搜索、标调转换、课程分架
+  data.ts            数据加载、查字、拼音搜索（声调折叠）、标调转换、课程分架
   handwrite.ts       手写识别（OfflineHandwriteRecognitionService 的 TS 移植）
   voice.ts           语音识别状态机（Web Speech API，2.2s 静音自动停）
   library.ts         字本子状态（localStorage，对应 LibraryStore）
@@ -67,12 +69,15 @@ src/
 static/zi/           可直接发布的成品（构建产物 + 数据，均已提交）
   index.html / styles.css / app.js / manifest.webmanifest / service-worker.js
   icons/             PWA 图标（取自 iOS App Icon）
-  data/              build-data.py 的产物（strokes/ 按字懒加载，
-                     handwrite_index.json 进手写屏时才拉取）
+  data/              build-data.py 的产物（约 34MB：characters 591KB、
+                     strokes/ 9574 个按字懒加载、handwrite_index 4.2MB 懒加载）
 ```
 
 hanzi-writer 的数据与 iOS 版同源（都来自 Make Me a Hanzi / Arphic 授权），
 `charDataLoader` 直接指向本地 `data/strokes/字.json`，离线可用、无 CDN 依赖。
+已知取舍：多音字取字典第一读音参与搜索（如「长」搜 cháng 能中、zhǎng 不能）；
+新补全字的释义为 makemeahanzi 英文短释义，无拆字提示与词语例句（课程 522 字
+仍是精校内容）。
 
 ## 本地开发
 
@@ -102,7 +107,8 @@ npm run serve    # http://localhost:8765/zi/
 ## 数据来源与许可
 
 与 iOS 版一致：笔顺数据来自 Make Me a Hanzi（SVG 路径 + 中线点），
-查字表为项目自建 SQLite，词语/例句/补充/课程为项目自撰的第一版内容；
+查字表为项目自建 SQLite（522 课程字）+ makemeahanzi 字典补全（拼音/释义/部首），
+词语/例句/补充/课程为项目自撰的第一版内容；
 HSKHSK 等第三方词表仅作研究参考，未打包。详见 iOS 仓库 README 的 Data Notes。
 
 ## 与 iOS 版的关系

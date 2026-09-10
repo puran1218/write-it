@@ -20,13 +20,13 @@ async function loadJson<T>(relativePath: string): Promise<T> {
 // ---------------------------------------------------------------------------
 // Bundled tables (loaded once, on first use)
 
-let charactersTable: Promise<Record<string, { p: string; d?: string; sc?: number }>> | null = null;
+let charactersTable: Promise<Record<string, { p: string; d?: string; sc?: number; r?: string }>> | null = null;
 let wordsTable: Promise<Record<string, WordItem[]>> | null = null;
 let sentencesTable: Promise<Record<string, SentenceItem[]>> | null = null;
 let supplementsTable: Promise<Record<string, Supplement>> | null = null;
 let curriculumOrder: Promise<string[]> | null = null;
 
-function characters(): Promise<Record<string, { p: string; d?: string; sc?: number }>> {
+function characters(): Promise<Record<string, { p: string; d?: string; sc?: number; r?: string }>> {
   charactersTable ??= loadJson("./data/characters.json");
   return charactersTable;
 }
@@ -118,7 +118,7 @@ export async function lookup(character: string): Promise<CharacterInfo> {
     character,
     pinyin: entry?.p || `${character}0`,
     definition: entry?.d ?? null,
-    radical: supplement?.r ?? null,
+    radical: supplement?.r ?? entry?.r ?? null,
     structure: supplement?.st ?? null,
     components: supplement?.c ?? null,
     decomposition: supplement?.dc ?? null,
@@ -152,9 +152,18 @@ export function searchTerm(forQuery: string): string {
   return [...chinese].reverse().find((char) => !LOW_INTENT_CHARACTERS.has(char)) ?? chinese[chinese.length - 1];
 }
 
+/** 拼音搜索键：去声调符号与数字、转小写（"dà"/"da4" → "da"）。 */
+function foldPinyin(pinyin: string): string {
+  return pinyin
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[0-9]/g, "")
+    .toLowerCase();
+}
+
 /** Pinyin prefix search ("hua" → 花 画 化…), capped like the iOS app. */
 export async function searchByPinyin(query: string): Promise<CharacterPreview[]> {
-  const cleaned = query.replace(/[0-9]/g, "").toLowerCase();
+  const cleaned = foldPinyin(query);
   if (!cleaned) {
     return [];
   }
@@ -162,7 +171,7 @@ export async function searchByPinyin(query: string): Promise<CharacterPreview[]>
   const table = await characters();
   const results: CharacterPreview[] = [];
   for (const [character, entry] of Object.entries(table)) {
-    if (entry.p.replace(/[0-9]/g, "").startsWith(cleaned)) {
+    if (foldPinyin(entry.p).startsWith(cleaned)) {
       results.push({ character, pinyin: entry.p });
       if (results.length >= 12) {
         break;

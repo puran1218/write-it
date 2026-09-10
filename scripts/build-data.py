@@ -24,13 +24,14 @@ def dump(path: Path, payload) -> None:
     print(f"  {path.relative_to(REPO_ROOT)} ({path.stat().st_size / 1024:.0f} KB)")
 
 
-def convert_characters(db_path: Path) -> dict:
+def convert_characters(db_path: Path, dictionary_path: Path) -> dict:
     conn = sqlite3.connect(db_path)
     rows = conn.execute(
         "SELECT character, pinyin, definition, stroke_count FROM characters"
     ).fetchall()
     conn.close()
 
+    # iOS 打包的 522 字是权威数据（声调数字 + 人工校对），排在前
     characters = {}
     for char, pinyin, definition, stroke_count in rows:
         entry = {"p": pinyin or ""}
@@ -39,7 +40,50 @@ def convert_characters(db_path: Path) -> dict:
         if stroke_count:
             entry["sc"] = stroke_count
         characters[char] = entry
+
+    # makemeahanzi 字典补全覆盖：声调符号拼音（displayPinyin 原样显示）+
+    # 英文释义 + 部首。无拼音的部首字形（⺀ 等）搜不到，跳过以控制体积。
+    added = 0
+    with dictionary_path.open(encoding="utf-8") as stream:
+        for line in stream:
+            obj = json.loads(line)
+            char = obj.get("character", "")
+            if not char or char in characters or len(char) != 1:
+                continue
+            pinyin = obj.get("pinyin") or []
+            if not pinyin:
+                continue
+            entry = {"p": pinyin[0]}
+            if obj.get("definition"):
+                entry["d"] = obj["definition"]
+            if obj.get("radical"):
+                entry["r"] = obj["radical"]
+            characters[char] = entry
+            added += 1
+    print(f"    characters: {len(rows)} from db + {added} from makemeahanzi dictionary")
     return characters
+
+
+def convert_strokes(source_dir: Path) -> None:
+    """hanzi-writer-data（devDependency）全量单字笔顺，去掉 radStrokes 精简。"""
+    strokes_out = OUT_DIR / "strokes"
+    if strokes_out.exists():
+        shutil.rmtree(strokes_out)
+    strokes_out.mkdir(parents=True)
+
+    count = 0
+    for path in sorted(source_dir.glob("*.json")):
+        if len(path.stem) != 1:
+            continue  # 跳过 index.js / README 等非单字文件
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload.pop("radStrokes", None)
+        (strokes_out / path.name).write_text(
+            json.dumps(payload, ensure_ascii=False, separators=(",", ":")),
+            encoding="utf-8",
+        )
+        count += 1
+    total_mb = sum(f.stat().st_size for f in strokes_out.glob("*.json")) / 1024 / 1024
+    print(f"  data/strokes/ ({count} files, {total_mb:.1f} MB total)")
 
 
 def main() -> None:
@@ -50,8 +94,11 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     print(f"Converting data from {source}:")
 
-    # 1. Character lookup table (from SQLite)
-    dump(OUT_DIR / "characters.json", convert_characters(source / "Data" / "characters.db"))
+    # 1. Character lookup table (SQLite 522 字 + makemeahanzi 字典补全)
+    dump(
+        OUT_DIR / "characters.json",
+        convert_characters(source / "Data" / "characters.db", source / "Data" / "dictionary.txt"),
+    )
 
     # 2. Curated words (the SQLite words table may not exist; iOS reads this JSON)
     raw_words = json.loads((source / "Data" / "character_words.json").read_text("utf-8"))
@@ -111,13 +158,11 @@ def main() -> None:
         f"({(OUT_DIR / 'handwrite_index.json').stat().st_size / 1024 / 1024:.1f} MB)"
     )
 
-    # 6. Per-character stroke files (makemeahanzi SVG paths + medians), copied as-is
-    strokes_out = OUT_DIR / "strokes"
-    if strokes_out.exists():
-        shutil.rmtree(strokes_out)
-    shutil.copytree(source / "Data" / "strokes", strokes_out)
-    total_kb = sum(f.stat().st_size for f in strokes_out.glob("*.json")) / 1024
-    print(f"  data/strokes/ ({len(list(strokes_out.glob('*.json')))} files, {total_kb:.0f} KB total)")
+    # 6. Per-character stroke files: hanzi-writer-data 全量（含 iOS 522 字的超集）
+    hw_data_dir = REPO_ROOT / "node_modules" / "hanzi-writer-data"
+    if not hw_data_dir.is_dir():
+        sys.exit("hanzi-writer-data missing — run: npm install")
+    convert_strokes(hw_data_dir)
 
 
 if __name__ == "__main__":
