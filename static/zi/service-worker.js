@@ -1,4 +1,4 @@
-const CACHE_NAME = "zi-v1";
+const CACHE_NAME = "zi-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -29,13 +29,14 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// 联网时优先取最新文件并更新缓存（含按需加载的笔顺 JSON），离线时退回缓存
+// 联网时优先取最新文件并更新缓存（no-cache 强制 revalidate，避免启发式
+// 缓存让刷新拿到旧文件），离线时退回缓存
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") {
     return;
   }
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: "no-cache" })
       .then(response => {
         if (response.ok && event.request.url.startsWith(self.registration.scope)) {
           const copy = response.clone();

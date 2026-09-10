@@ -669,6 +669,8 @@ button {
   display: flex;
   justify-content: center;
   margin-top: -30px;
+  /* 负 margin 使标题行叠在顶栏上，关掉命中测试以免挡住返回键下半圆 */
+  pointer-events: none;
 }
 
 .strokes-title {
