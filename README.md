@@ -77,7 +77,9 @@ hanzi-writer 的数据与 iOS 版同源（都来自 Make Me a Hanzi / Arphic 授
 `charDataLoader` 直接指向本地 `data/strokes/字.json`，离线可用、无 CDN 依赖。
 已知取舍：多音字取字典第一读音参与搜索（如「长」搜 cháng 能中、zhǎng 不能）；
 新补全字的释义为 makemeahanzi 英文短释义，无拆字提示与词语例句（课程 522 字
-仍是精校内容）。
+仍是精校内容）。结构字段：精校补充优先，其余由 makemeahanzi IDS 拆解式
+派生（⿰→左右、⿱→上下、⿻/单部件→独体字 等，覆盖约 95%），
+覆盖统计随时可跑 `python3 scripts/coverage-report.py`。
 
 ## 本地开发
 

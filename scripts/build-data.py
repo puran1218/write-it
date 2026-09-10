@@ -24,12 +24,45 @@ def dump(path: Path, payload) -> None:
     print(f"  {path.relative_to(REPO_ROOT)} ({path.stat().st_size / 1024:.0f} KB)")
 
 
-def convert_characters(db_path: Path, dictionary_path: Path) -> dict:
+# IDS 拆解式首算子 → 小学结构名（⿻ 重叠合成与单部件字归独体字）
+IDS_STRUCTURES = {
+    "⿰": "左右",
+    "⿱": "上下",
+    "⿲": "左中右",
+    "⿳": "上中下",
+    "⿴": "全包围",
+    "⿵": "上包围",
+    "⿶": "下包围",
+    "⿷": "左包围",
+    "⿸": "左上包围",
+    "⿹": "右上包围",
+    "⿺": "左下包围",
+    "⿻": "独体字",
+}
+
+
+def derive_structure(decomposition: str, char: str) -> str | None:
+    # makemeahanzi 拆解式不带空格：首字符即 IDS 算子（⿰女马 → 左右）；
+    # 单部件拆解（如 丁→一）为象形独体字
+    if not decomposition or "？" in decomposition:
+        return None
+    if decomposition == char or decomposition[0] not in IDS_STRUCTURES:
+        return "独体字"
+    return IDS_STRUCTURES[decomposition[0]]
+
+
+def convert_characters(db_path: Path, dictionary_path: Path, supplements_path: Path) -> dict:
     conn = sqlite3.connect(db_path)
     rows = conn.execute(
         "SELECT character, pinyin, definition, stroke_count FROM characters"
     ).fetchall()
     conn.close()
+
+    # 精校补充里已给结构的字不再用 IDS 派生覆盖
+    curated = json.loads(supplements_path.read_text("utf-8"))
+    has_curated_structure = {
+        char for char, s in curated.items() if s.get("structure")
+    }
 
     # iOS 打包的 522 字是权威数据（声调数字 + 人工校对），排在前
     characters = {}
@@ -42,25 +75,42 @@ def convert_characters(db_path: Path, dictionary_path: Path) -> dict:
         characters[char] = entry
 
     # makemeahanzi 字典补全覆盖：声调符号拼音（displayPinyin 原样显示）+
-    # 英文释义 + 部首。无拼音的部首字形（⺀ 等）搜不到，跳过以控制体积。
+    # 英文释义 + 部首 + IDS 派生结构。无拼音的部首字形（⺀ 等）搜不到，跳过。
     added = 0
+    derived_count = 0
     with dictionary_path.open(encoding="utf-8") as stream:
         for line in stream:
             obj = json.loads(line)
             char = obj.get("character", "")
-            if not char or char in characters or len(char) != 1:
+            if not char or len(char) != 1:
                 continue
-            pinyin = obj.get("pinyin") or []
-            if not pinyin:
+
+            structure = derive_structure(obj.get("decomposition") or "", char)
+            if structure and char not in has_curated_structure and not characters.get(char, {}).get("st"):
+                if char in characters:
+                    characters[char]["st"] = structure
+                derived_count += 1
+            # SQLite 字也补字典部首（展示层精校优先，这里只兜底）
+            if char in characters:
+                if obj.get("radical") and not characters[char].get("r"):
+                    characters[char]["r"] = obj["radical"]
                 continue
-            entry = {"p": pinyin[0]}
+
+            if not (obj.get("pinyin") or []):
+                continue
+            entry = {"p": obj["pinyin"][0]}
             if obj.get("definition"):
                 entry["d"] = obj["definition"]
             if obj.get("radical"):
                 entry["r"] = obj["radical"]
+            if structure:
+                entry["st"] = structure
             characters[char] = entry
             added += 1
-    print(f"    characters: {len(rows)} from db + {added} from makemeahanzi dictionary")
+    print(
+        f"    characters: {len(rows)} from db + {added} from makemeahanzi dictionary"
+        f"（{derived_count} 个结构来自 IDS 派生）"
+    )
     return characters
 
 
@@ -97,7 +147,11 @@ def main() -> None:
     # 1. Character lookup table (SQLite 522 字 + makemeahanzi 字典补全)
     dump(
         OUT_DIR / "characters.json",
-        convert_characters(source / "Data" / "characters.db", source / "Data" / "dictionary.txt"),
+        convert_characters(
+            source / "Data" / "characters.db",
+            source / "Data" / "dictionary.txt",
+            source / "Resources" / "character_supplements.json",
+        ),
     )
 
     # 2. Curated words (the SQLite words table may not exist; iOS reads this JSON)

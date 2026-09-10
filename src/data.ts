@@ -20,13 +20,13 @@ async function loadJson<T>(relativePath: string): Promise<T> {
 // ---------------------------------------------------------------------------
 // Bundled tables (loaded once, on first use)
 
-let charactersTable: Promise<Record<string, { p: string; d?: string; sc?: number; r?: string }>> | null = null;
+let charactersTable: Promise<Record<string, { p: string; d?: string; sc?: number; r?: string; st?: string }>> | null = null;
 let wordsTable: Promise<Record<string, WordItem[]>> | null = null;
 let sentencesTable: Promise<Record<string, SentenceItem[]>> | null = null;
 let supplementsTable: Promise<Record<string, Supplement>> | null = null;
 let curriculumOrder: Promise<string[]> | null = null;
 
-function characters(): Promise<Record<string, { p: string; d?: string; sc?: number; r?: string }>> {
+function characters(): Promise<Record<string, { p: string; d?: string; sc?: number; r?: string; st?: string }>> {
   charactersTable ??= loadJson("./data/characters.json");
   return charactersTable;
 }
@@ -119,7 +119,7 @@ export async function lookup(character: string): Promise<CharacterInfo> {
     pinyin: entry?.p || `${character}0`,
     definition: entry?.d ?? null,
     radical: supplement?.r ?? entry?.r ?? null,
-    structure: supplement?.st ?? null,
+    structure: supplement?.st ?? entry?.st ?? null,
     components: supplement?.c ?? null,
     decomposition: supplement?.dc ?? null,
     learningHint: supplement?.h ?? null,
