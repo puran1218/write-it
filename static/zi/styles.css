@@ -665,17 +665,29 @@ button {
 
 /* ------------------------------------------------------------------ 笔顺 */
 
-.strokes-title-row {
+/* 模式切换（笔顺演示 | 练一练） */
+.mode-tabs {
   display: flex;
-  justify-content: center;
-  margin-top: -30px;
-  /* 负 margin 使标题行叠在顶栏上，关掉命中测试以免挡住返回键下半圆 */
-  pointer-events: none;
+  gap: 4px;
+  margin: 0 20px 4px;
+  padding: 4px;
+  background: #fff;
+  border: 2px solid var(--outline);
+  border-radius: 14px;
 }
 
-.strokes-title {
-  font-family: var(--font-hanzi);
-  font-size: 26px;
+.mode-tab {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.mode-tab-active {
+  background: var(--sky-blue);
+  color: var(--outline);
 }
 
 .strokes-body {

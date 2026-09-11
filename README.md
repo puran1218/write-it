@@ -21,10 +21,12 @@
   覆盖 9565 字（522 个课程字 + makemeahanzi 字典补全）
 - `大字详情`：田字格超大字、标调拼音、释义、部首、朗读（Web Speech zh-CN）；
   笔顺/描红覆盖 hanzi-writer-data 全量 9574 字，「还没有笔顺」基本消失
-- `笔顺演示`：[hanzi-writer](https://hanziwriter.org)（MIT）逐笔播放，
-  淡底字轮廓 + 田字格参考线，状态文案与写完的墨点庆祝沿用 iOS 版
-- `练一练`：hanzi-writer 描红测验——笔顺**和方向**判定、错两次出天蓝色
-  提示、写完整字闪绿 + 墨点庆祝、完成统计小失误次数
+- `笔顺演示` + `练一练`：合并为一个「写字」屏，顶部固定「✍︎ 笔顺演示｜✎ 练一练」
+  标签切换，主按钮位置恒定不再互跳。演示用
+  [hanzi-writer](https://hanziwriter.org)（MIT）逐笔播放（速度 0.5），
+  淡底字轮廓 + 田字格参考线，写完墨点庆祝；
+  练一练为描红测验——笔顺**和方向**判定、错两次出天蓝色提示、
+  完成整字闪绿 + 墨点庆祝、统计小失误次数
 - `字本子`：按课程顺序的贴纸货架（刚认识 / 常说常用 / 身边看到 / 继续探索），
   看过的字点亮成贴纸，收藏带 ♥，进度条统计
 - `今日一字`、`最近查过`（首页）
@@ -65,7 +67,7 @@ src/
     writer.ts        hanzi-writer 实例工厂（主题色落地、charDataLoader 走本地数据）
     stroke-view.ts   田字格参考线 + 墨点庆祝
     mascot.ts        字宝宝吉祥物 SVG
-  screens/           home / search / handwrite / detail / strokes / practice / book
+  screens/           home / search / handwrite / detail / writing(演示+练习) / book
 static/zi/           可直接发布的成品（构建产物 + 数据，均已提交）
   index.html / styles.css / app.js / manifest.webmanifest / service-worker.js
   icons/             PWA 图标（取自 iOS App Icon）

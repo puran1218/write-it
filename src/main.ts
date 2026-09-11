@@ -6,9 +6,8 @@ import { renderBook } from "./screens/book";
 import { renderDetail } from "./screens/detail";
 import { renderHandwrite } from "./screens/handwrite";
 import { renderHome } from "./screens/home";
-import { renderPractice } from "./screens/practice";
 import { renderSearch } from "./screens/search";
-import { renderStrokes } from "./screens/strokes";
+import { renderWriting } from "./screens/writing";
 
 const appRoot = document.getElementById("app")!;
 const library = new LibraryStore();
@@ -34,10 +33,10 @@ function render(): void {
       void renderDetail(appRoot, route.character, library);
       break;
     case "strokes":
-      void renderStrokes(appRoot, route.character);
+      void renderWriting(appRoot, route.character, "demo");
       break;
     case "practice":
-      void renderPractice(appRoot, route.character);
+      void renderWriting(appRoot, route.character, "practice");
       break;
   }
 }
