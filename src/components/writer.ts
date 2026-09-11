@@ -28,7 +28,7 @@ export function createWriter(
     drawingWidth: Math.max(6, Math.round(size * 0.022)),
     showOutline: true,
     showCharacter: false,
-    strokeAnimationSpeed: 0.7, // 演示放慢一点，方便小朋友看清每一笔
+    strokeAnimationSpeed: 0.5, // 演示放慢一倍，方便小朋友看清每一笔
     width: size,
     height: size,
     padding: Math.round(size * 0.07),

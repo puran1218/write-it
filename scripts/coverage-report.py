@@ -31,13 +31,22 @@ def has_learning(char: str) -> bool:
     return bool(s.get("dc") or s.get("h"))
 
 
+def has_components(char: str) -> bool:
+    return bool(supplements.get(char, {}).get("c") or table[char].get("c"))
+
+
+def has_hint(char: str) -> bool:
+    return bool(supplements.get(char, {}).get("h"))
+
+
 rows = [
     ("有笔顺", lambda c: c in stroke_files),
     ("有拼音", lambda c: bool(table[c].get("p"))),
     ("有释义", lambda c: bool(table[c].get("d"))),
     ("有部首", has_radical),
     ("有结构", has_structure),
-    ("有拆字/口诀", has_learning),
+    ("有拆字部件", has_components),
+    ("有口诀(精校)", has_hint),
 ]
 
 print(f"字符表 {len(all_chars)} 字 ｜ 课程 {len(curriculum)} 字 ｜ 精校补充 {len(supplements)} 字 ｜ 笔顺文件 {len(stroke_files)} 个")

@@ -25,10 +25,10 @@ export async function renderSearch(root: HTMLElement): Promise<void> {
         ${
           withVoice
             ? `
-        <div class="voice-card">
-          <button class="voice-mic" data-action="voice" aria-label="说一个字">🎤</button>
+        <button class="voice-card" data-action="voice" aria-label="点一下说话查字">
+          <span class="voice-mic">🎤</span>
           <span class="voice-status" data-role="voice-status">${VOICE_STATUS_TEXT.idle}</span>
-        </div>
+        </button>
         <p class="voice-caption">还可以自己输入</p>`
             : ""
         }
@@ -64,7 +64,7 @@ export async function renderSearch(root: HTMLElement): Promise<void> {
     }
     statusEl.textContent = VOICE_STATUS_TEXT[state];
     statusEl.classList.toggle("voice-status-listening", state === "listening");
-    root.querySelector(".voice-mic")?.classList.toggle("voice-mic-listening", state === "listening");
+    root.querySelector(".voice-card")?.classList.toggle("voice-card-listening", state === "listening");
   }
 
   root.querySelector('[data-action="voice"]')?.addEventListener("click", () => {

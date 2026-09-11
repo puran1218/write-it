@@ -749,10 +749,20 @@ button {
   display: flex;
   align-items: center;
   gap: 14px;
+  width: 100%;
   padding: 14px 16px;
   background: #fff;
   border: 1.6px solid rgba(42, 37, 32, 0.9);
   border-radius: 18px;
+  text-align: left;
+}
+
+.voice-card:active {
+  transform: scale(0.98);
+}
+
+.voice-card-listening {
+  background: var(--sky-blue);
 }
 
 .voice-mic {
@@ -768,8 +778,7 @@ button {
   flex: none;
 }
 
-.voice-mic-listening {
-  background: var(--sky-blue);
+.voice-card-listening .voice-mic {
   animation: voice-pulse 1.2s ease-in-out infinite;
 }
 

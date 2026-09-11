@@ -51,6 +51,20 @@ def derive_structure(decomposition: str, char: str) -> str | None:
     return IDS_STRUCTURES[decomposition[0]]
 
 
+def derive_components(decomposition: str, char: str) -> list[str] | None:
+    """IDS 拆解式的叶子部件 → 「可以这样拆」标签（⿰女马 → [女, 马]）。"""
+    if not decomposition or "？" in decomposition or decomposition == char:
+        return None
+    comps: list[str] = []
+    for ch in decomposition:
+        if ch in IDS_STRUCTURES or ch in comps:
+            continue
+        comps.append(ch)
+        if len(comps) == 4:
+            break
+    return comps or None
+
+
 def convert_characters(db_path: Path, dictionary_path: Path, supplements_path: Path) -> dict:
     conn = sqlite3.connect(db_path)
     rows = conn.execute(
@@ -86,14 +100,17 @@ def convert_characters(db_path: Path, dictionary_path: Path, supplements_path: P
                 continue
 
             structure = derive_structure(obj.get("decomposition") or "", char)
+            components = derive_components(obj.get("decomposition") or "", char)
             if structure and char not in has_curated_structure and not characters.get(char, {}).get("st"):
                 if char in characters:
                     characters[char]["st"] = structure
                 derived_count += 1
-            # SQLite 字也补字典部首（展示层精校优先，这里只兜底）
+            # SQLite 字也补字典部首/部件（展示层精校优先，这里只兜底）
             if char in characters:
                 if obj.get("radical") and not characters[char].get("r"):
                     characters[char]["r"] = obj["radical"]
+                if components and not curated.get(char, {}).get("components") and not characters[char].get("c"):
+                    characters[char]["c"] = components
                 continue
 
             if not (obj.get("pinyin") or []):
@@ -105,6 +122,8 @@ def convert_characters(db_path: Path, dictionary_path: Path, supplements_path: P
                 entry["r"] = obj["radical"]
             if structure:
                 entry["st"] = structure
+            if components:
+                entry["c"] = components
             characters[char] = entry
             added += 1
     print(

@@ -24,9 +24,12 @@ interface IndexEntry {
 
 const MINIMUM_SCORE = 0.25;
 const LOW_SCORE_FALLBACK = 0.08;
-const MAX_CANDIDATES = 6;
+const MAX_CANDIDATES = 8;
 const MINIMUM_DRAWING_LENGTH = 16;
 const SAMPLE_COUNT = 20;
+/** 笔画数差惩罚：下限放宽到 0.7，少写几笔也能出候选 */
+const COUNT_PENALTY_FLOOR = 0.7;
+const COUNT_PENALTY_STEP = 0.12;
 
 let indexPromise: Promise<IndexEntry[]> | null = null;
 
@@ -46,6 +49,20 @@ function loadIndex(): Promise<IndexEntry[]> {
   return indexPromise;
 }
 
+/** 索引笔画的归一化+重采样缓存（与输入无关，整个会话只算一次）。 */
+const resampledCache = new WeakMap<IndexEntry, StrokePoint[][]>();
+
+function resampledStrokes(entry: IndexEntry): StrokePoint[][] {
+  let cached = resampledCache.get(entry);
+  if (!cached) {
+    cached = normalize(entry.strokes.map((stroke) => stroke.points)).map((stroke) =>
+      resample(stroke, SAMPLE_COUNT)
+    );
+    resampledCache.set(entry, cached);
+  }
+  return cached;
+}
+
 export async function recognize(strokes: HandwriteStroke[]): Promise<HandwriteCandidate[]> {
   if (strokes.some((stroke) => stroke.length < 2)) {
     throw new Error("invalid-stroke");
@@ -58,10 +75,10 @@ export async function recognize(strokes: HandwriteStroke[]): Promise<HandwriteCa
 
   const index = await loadIndex();
 
-  // 画布 y 向下 → 索引 y 向上：取反后再归一化
+  // 画布 y 向下 → 索引 y 向上：取反后再归一化；输入笔同样重采样备用
   const normalizedInput = normalize(
     strokes.map((stroke) => stroke.map((point) => ({ x: point.x, y: -point.y })))
-  );
+  ).map((stroke) => resample(stroke, SAMPLE_COUNT));
   if (normalizedInput.length === 0) {
     return [];
   }
@@ -80,20 +97,47 @@ export async function recognize(strokes: HandwriteStroke[]): Promise<HandwriteCa
 }
 
 function scoreInput(input: StrokePoint[][], entry: IndexEntry): number {
-  const indexed = normalize(entry.strokes.map((stroke) => stroke.points));
+  const indexed = resampledStrokes(entry);
   if (input.length === 0 || indexed.length === 0) {
     return 0;
   }
 
   const comparedCount = Math.min(input.length, indexed.length);
-  const strokeScores: number[] = [];
+  const positional: number[] = [];
   for (let index = 0; index < comparedCount; index += 1) {
-    strokeScores.push(scoreStroke(input[index], indexed[index]));
+    positional.push(scoreStroke(input[index], indexed[index]));
   }
 
+  // 贪心最佳配对：每个输入笔在整字所有笔里找最像的一笔（不限书写顺序），
+  // 与严格顺序分取最大——漏笔、换序时仍能命中
+  const used = new Set<number>();
+  const greedy: number[] = [];
+  for (const inputStroke of input) {
+    let best = -1;
+    let bestIndex = -1;
+    for (let index = 0; index < indexed.length; index += 1) {
+      if (used.has(index)) {
+        continue;
+      }
+      const candidate = scoreStroke(inputStroke, indexed[index]);
+      if (candidate > best) {
+        best = candidate;
+        bestIndex = index;
+      }
+    }
+    if (bestIndex >= 0) {
+      used.add(bestIndex);
+      greedy.push(best);
+    }
+  }
+
+  const positionalScore = positional.reduce((total, value) => total + value, 0) / positional.length;
+  const greedyScore = greedy.reduce((total, value) => total + value, 0) / greedy.length;
+  const best = Math.max(positionalScore, greedyScore);
+
   const strokeCountDelta = Math.abs(input.length - indexed.length);
-  const strokeCountPenalty = Math.max(0.55, 1 - strokeCountDelta * 0.12);
-  return (strokeScores.reduce((total, value) => total + value, 0) / strokeScores.length) * strokeCountPenalty;
+  const strokeCountPenalty = Math.max(COUNT_PENALTY_FLOOR, 1 - strokeCountDelta * COUNT_PENALTY_STEP);
+  return best * strokeCountPenalty;
 }
 
 function scoreStroke(input: StrokePoint[], indexed: StrokePoint[]): number {
@@ -101,10 +145,7 @@ function scoreStroke(input: StrokePoint[], indexed: StrokePoint[]): number {
     return 0;
   }
 
-  const resampledInput = resample(input, SAMPLE_COUNT);
-  const resampledIndexed = resample(indexed, SAMPLE_COUNT);
-
-  const distanceScore = Math.max(0, 1 - averageDistance(resampledInput, resampledIndexed) * 1.7);
+  const distanceScore = Math.max(0, 1 - averageDistance(input, indexed) * 1.7);
   const startScore = Math.max(0, 1 - distance(input[0], indexed[0]) * 2.2);
   const endScore = Math.max(0, 1 - distance(input[input.length - 1], indexed[indexed.length - 1]) * 2.2);
   const lengthScore = Math.max(0, 1 - Math.abs(pathLength(input) - pathLength(indexed)) * 1.8);
