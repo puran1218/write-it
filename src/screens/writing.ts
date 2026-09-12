@@ -24,17 +24,19 @@ export async function renderWriting(
       <header class="top-bar">
         <button class="icon-button" data-action="back" aria-label="返回">‹</button>
         <span class="top-bar-spacer"></span>
-        <span class="top-bar-title">${esc(character)}</span>
-        <span class="top-bar-spacer"></span>
       </header>
 
-      <div class="mode-tabs" role="tablist">
-        <button class="mode-tab" data-mode="demo" role="tab">✍︎ 笔顺演示</button>
-        <button class="mode-tab" data-mode="practice" role="tab">✎ 练一练</button>
-      </div>
+      <div class="writing-main">
+        <span class="writing-title">${esc(character)}</span>
 
-      <div class="strokes-body" data-role="body">
-        <div class="strokes-status" aria-live="polite">准备中…</div>
+        <div class="mode-tabs" role="tablist">
+          <button class="mode-tab" data-mode="demo" role="tab">✍︎ 笔顺演示</button>
+          <button class="mode-tab" data-mode="practice" role="tab">✎ 练一练</button>
+        </div>
+
+        <div class="strokes-body" data-role="body">
+          <div class="strokes-status" aria-live="polite">准备中…</div>
+        </div>
       </div>
     </div>`;
 
