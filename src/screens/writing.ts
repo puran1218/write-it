@@ -6,6 +6,7 @@ import { goBack } from "../router";
 import { esc } from "../ui";
 import { celebrate, tianGridSvg } from "../components/stroke-view";
 import { createWriter } from "../components/writer";
+import type { LibraryStore } from "../library";
 
 export type WritingMode = "demo" | "practice";
 
@@ -17,7 +18,8 @@ const PRACTICE_STATUS_IDLE = "照着淡影，一笔一笔描";
 export async function renderWriting(
   root: HTMLElement,
   character: string,
-  initialMode: WritingMode
+  initialMode: WritingMode,
+  library: LibraryStore
 ): Promise<void> {
   root.innerHTML = `
     <div class="screen">
@@ -190,6 +192,7 @@ export async function renderWriting(
             : `写好啦！✨（有 ${summary.totalMistakes} 次小失误）`;
         statusEl.classList.add("strokes-status-done");
         celebrate(card);
+        library.markPracticed(character); // 字本子：全彩贴纸 + ✓
         replayButton.disabled = false;
       },
     };

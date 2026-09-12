@@ -968,21 +968,6 @@ button {
   color: var(--text-muted);
 }
 
-.progress-track {
-  height: 10px;
-  margin: 10px 18px 0;
-  background: #fff;
-  border: 1.5px solid rgba(42, 37, 32, 0.9);
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: var(--sky-blue);
-  border-radius: 999px;
-}
-
 .book-sections {
   padding: 0 18px 120px;
 }
@@ -1020,6 +1005,19 @@ button {
   padding: 11px;
 }
 
+.sticker-grid-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 11px;
+}
+
+.sticker-empty-hint {
+  font-size: 13px;
+  color: var(--text-soft);
+  text-align: center;
+}
+
 .sticker-cell {
   position: relative;
   aspect-ratio: 1;
@@ -1035,21 +1033,25 @@ button {
   font-size: 30px;
 }
 
-.sticker-cell-locked {
-  background: rgba(42, 37, 32, 0.04);
-  border: 1.6px dashed var(--text-soft);
-  box-shadow: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: default;
+/* 已练会：全彩 + ✓ 徽章 */
+.sticker-cell-practiced .sticker-check {
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--success-green);
 }
 
-.sticker-question {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--text-soft);
-  font-family: var(--font-ui);
+/* 看过了：淡色（未练） */
+.sticker-cell-viewed {
+  background: var(--paper-alt);
+  border-color: rgba(42, 37, 32, 0.55);
+}
+
+.sticker-cell-viewed .sticker-char {
+  color: var(--text-muted);
+  opacity: 0.75;
 }
 
 .sticker-heart {
@@ -1058,6 +1060,32 @@ button {
   right: 5px;
   font-size: 10px;
   font-weight: 700;
+}
+
+/* 空状态 */
+.book-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 120px 30px 0;
+  text-align: center;
+}
+
+.book-empty-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.book-empty-text {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0 0 8px;
+}
+
+.book-empty-cta {
+  max-width: 220px;
 }
 
 /* ------------------------------------------------------------------ 吉祥物 */

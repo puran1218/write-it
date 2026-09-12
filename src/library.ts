@@ -4,6 +4,7 @@ import type { LibraryState } from "./types";
 
 const STORAGE_KEY = "zi-library-v1";
 const RECENT_LIMIT = 24;
+const PRACTICED_LIMIT = 500;
 
 type Listener = () => void;
 
@@ -38,6 +39,19 @@ export class LibraryStore {
     this.save();
   }
 
+  /** 练一练完整写对 → 全彩贴纸（字本子的成就层）。 */
+  markPracticed(character: string): void {
+    this.markViewed(character);
+    this.state = {
+      ...this.state,
+      practicedCharacters: [
+        character,
+        ...this.state.practicedCharacters.filter((item) => item !== character),
+      ].slice(0, PRACTICED_LIMIT),
+    };
+    this.save();
+  }
+
   toggleFavorite(character: string): void {
     const isFavorite = this.state.favoriteCharacters.includes(character);
     this.state = {
@@ -62,12 +76,18 @@ export class LibraryStore {
           recentCharacters: parsed.recentCharacters ?? [],
           unlockedCharacters: parsed.unlockedCharacters ?? [],
           favoriteCharacters: parsed.favoriteCharacters ?? [],
+          practicedCharacters: parsed.practicedCharacters ?? [],
         };
       }
     } catch {
       // Corrupted state — start fresh.
     }
-    return { recentCharacters: [], unlockedCharacters: [], favoriteCharacters: [] };
+    return {
+      recentCharacters: [],
+      unlockedCharacters: [],
+      favoriteCharacters: [],
+      practicedCharacters: [],
+    };
   }
 
   private save(): void {

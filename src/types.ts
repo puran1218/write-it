@@ -45,11 +45,13 @@ export interface CharacterInfo {
   sentences: SentenceItem[];
 }
 
-/** Persisted 字本子 state — mirror of LibraryState.swift. */
+/** Persisted 字本子 state — mirror of LibraryState.swift（web 版增加 practicedCharacters）. */
 export interface LibraryState {
   recentCharacters: string[];
   unlockedCharacters: string[];
   favoriteCharacters: string[];
+  /** 练一练完整写对的字，最近的在前 */
+  practicedCharacters: string[];
 }
 
 /** Ranked handwriting candidate — mirror of HandwriteCandidate.swift. */

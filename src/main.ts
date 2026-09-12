@@ -33,10 +33,10 @@ function render(): void {
       void renderDetail(appRoot, route.character, library);
       break;
     case "strokes":
-      void renderWriting(appRoot, route.character, "demo");
+      void renderWriting(appRoot, route.character, "demo", library);
       break;
     case "practice":
-      void renderWriting(appRoot, route.character, "practice");
+      void renderWriting(appRoot, route.character, "practice", library);
       break;
   }
 }
