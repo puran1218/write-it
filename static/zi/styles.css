@@ -665,26 +665,24 @@ button {
 
 /* ------------------------------------------------------------------ 笔顺 */
 
-/* 模式切换（笔顺演示 | 练一练）——与标题、画布一起垂直居中 */
+/* 写字屏：标题在顶栏外横向居中，内容自然从上往下排 */
 .writing-main {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 12px;
-  padding: 0 20px 12px;
 }
 
 .writing-title {
   font-family: var(--font-hanzi);
-  font-size: 30px;
+  font-size: 26px;
   line-height: 1.2;
   text-align: center;
+  margin: -4px 0 8px;
 }
 
 .mode-tabs {
   display: flex;
   gap: 4px;
+  margin: 0 20px 4px;
   padding: 4px;
   background: #fff;
   border: 2px solid var(--outline);
@@ -709,7 +707,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  width: 100%;
+  padding: 10px 20px 40px;
 }
 
 .strokes-status {
