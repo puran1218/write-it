@@ -134,25 +134,39 @@ def convert_characters(db_path: Path, dictionary_path: Path, supplements_path: P
 
 
 def convert_strokes(source_dir: Path) -> None:
-    """hanzi-writer-data（devDependency）全量单字笔顺，去掉 radStrokes 精简。"""
-    strokes_out = OUT_DIR / "strokes"
-    if strokes_out.exists():
-        shutil.rmtree(strokes_out)
-    strokes_out.mkdir(parents=True)
+    """hanzi-writer-data 全量单字笔顺，打包成 N 个大文件（micro.blog 静态发布
+    对近万个散文件不友好）；manifest 记录 字 → 分包 的映射。"""
+    packs_dir = OUT_DIR / "strokes-packs"
+    legacy = OUT_DIR / "strokes"
+    if legacy.exists():
+        shutil.rmtree(legacy)
+    if packs_dir.exists():
+        shutil.rmtree(packs_dir)
+    packs_dir.mkdir(parents=True)
 
-    count = 0
-    for path in sorted(source_dir.glob("*.json")):
-        if len(path.stem) != 1:
-            continue  # 跳过 index.js / README 等非单字文件
-        payload = json.loads(path.read_text(encoding="utf-8"))
-        payload.pop("radStrokes", None)
-        (strokes_out / path.name).write_text(
-            json.dumps(payload, ensure_ascii=False, separators=(",", ":")),
+    files = sorted(p for p in source_dir.glob("*.json") if len(p.stem) == 1)
+    pack_size = 400
+    manifest: dict[str, str] = {}
+
+    pack_count = (len(files) + pack_size - 1) // pack_size
+    for pack_index in range(pack_count):
+        chunk = files[pack_index * pack_size : (pack_index + 1) * pack_size]
+        pack = {}
+        for path in chunk:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            payload.pop("radStrokes", None)
+            pack[path.stem] = payload
+            manifest[path.stem] = f"strokes-packs/strokes-{pack_index:03d}.json"
+        (packs_dir / f"strokes-{pack_index:03d}.json").write_text(
+            json.dumps(pack, ensure_ascii=False, separators=(",", ":")),
             encoding="utf-8",
         )
-        count += 1
-    total_mb = sum(f.stat().st_size for f in strokes_out.glob("*.json")) / 1024 / 1024
-    print(f"  data/strokes/ ({count} files, {total_mb:.1f} MB total)")
+
+    dump(OUT_DIR / "strokes-manifest.json", manifest)
+    total_mb = sum(f.stat().st_size for f in packs_dir.glob("*.json")) / 1024 / 1024
+    print(
+        f"  data/strokes-packs/ ({pack_count} packs, {len(manifest)} chars, {total_mb:.1f} MB total)"
+    )
 
 
 def main() -> None:

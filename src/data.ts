@@ -52,29 +52,52 @@ function curriculum(): Promise<string[]> {
 }
 
 // ---------------------------------------------------------------------------
-// Stroke files (per-character, lazy)
+// Stroke files（按分包懒加载：manifest 记录 字 → 分包，包内按字取数据）
 
-const strokeCache = new Map<string, Promise<StrokeSegment[]>>();
-
-function strokes(character: string): Promise<StrokeSegment[]> {
-  let pending = strokeCache.get(character);
-  if (!pending) {
-    pending = loadJson<RawStrokeFileShape>(`./data/strokes/${encodeURIComponent(character)}.json`)
-      .then((file) => parseStrokes(file))
-      .catch(() => []);
-    strokeCache.set(character, pending);
-  }
-  return pending;
-}
-
-interface RawStrokeFileShape {
+export interface StrokeFile {
   character: string;
   strokes: string[];
   medians?: number[][][];
 }
 
+interface RawStrokeData {
+  strokes: string[];
+  medians?: number[][][];
+}
+
+let packManifestPromise: Promise<Record<string, string>> | null = null;
+const packPromises = new Map<string, Promise<Record<string, RawStrokeData>>>();
+const strokeFileCache = new Map<string, Promise<StrokeFile | null>>();
+
+async function rawStrokeData(character: string): Promise<RawStrokeData | null> {
+  packManifestPromise ??= loadJson("./data/strokes-manifest.json");
+  const manifest = await packManifestPromise;
+  const packFile = manifest[character];
+  if (!packFile) {
+    return null;
+  }
+  let pack = packPromises.get(packFile);
+  if (!pack) {
+    pack = loadJson(`./data/${packFile}`);
+    packPromises.set(packFile, pack);
+  }
+  return (await pack)[character] ?? null;
+}
+
+/** 整份笔顺数据（hanzi-writer 的 charDataLoader 直接吃这个格式）。 */
+export function loadStrokeFile(character: string): Promise<StrokeFile | null> {
+  let pending = strokeFileCache.get(character);
+  if (!pending) {
+    pending = rawStrokeData(character)
+      .then((raw) => (raw ? { ...raw, character } : null))
+      .catch(() => null);
+    strokeFileCache.set(character, pending);
+  }
+  return pending;
+}
+
 /** makemeahanzi flat format → StrokeSegment list (same as OfflineDataManager.parseStrokes). */
-function parseStrokes(file: RawStrokeFileShape): StrokeSegment[] {
+function toSegments(file: RawStrokeData): StrokeSegment[] {
   return file.strokes.map((path, index) => ({
     strokeIndex: index,
     path,
@@ -84,32 +107,18 @@ function parseStrokes(file: RawStrokeFileShape): StrokeSegment[] {
   }));
 }
 
-export interface StrokeFile {
-  character: string;
-  strokes: string[];
-  medians?: number[][][];
-}
-
-/** 整份笔顺文件（hanzi-writer 的 charDataLoader 直接吃这个格式）。 */
-export async function loadStrokeFile(character: string): Promise<StrokeFile | null> {
-  try {
-    return await loadJson<StrokeFile>(`./data/strokes/${encodeURIComponent(character)}.json`);
-  } catch {
-    return null;
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Lookup
 
 export async function lookup(character: string): Promise<CharacterInfo> {
-  const [table, strokesData, wordList, sentenceList, supplementMap] = await Promise.all([
+  const [table, rawStrokes, wordList, sentenceList, supplementMap] = await Promise.all([
     characters(),
-    strokes(character),
+    rawStrokeData(character).catch(() => null),
     words(),
     sentences(),
     supplements(),
   ]);
+  const strokesData = rawStrokes ? toSegments(rawStrokes) : [];
 
   const entry = table[character];
   const supplement = supplementMap[character] ?? null;

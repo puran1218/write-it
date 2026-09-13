@@ -51,7 +51,8 @@ plugin.json          micro.blog 插件清单
 scripts/build-data.py
                      从 iOS 仓库（../minimaxi）转换数据：SQLite 查字表 + 字典
                      补全、词语/例句/补充/课程 JSON、手写识别索引；
-                     笔顺取自 hanzi-writer-data（devDependency）全量单字文件
+                     笔顺取自 hanzi-writer-data（devDependency）全量单字文件，
+                     打包成 24 个分包（避免近万散文件，micro.blog 发布友好）
 src/
   main.ts            路由分发、?char= 直达、Service Worker 注册
   router.ts          hash 路由（#/、#/book、#/search、#/handwrite、
@@ -71,8 +72,9 @@ src/
 static/zi/           可直接发布的成品（构建产物 + 数据，均已提交）
   index.html / styles.css / app.js / manifest.webmanifest / service-worker.js
   icons/             PWA 图标（取自 iOS App Icon）
-  data/              build-data.py 的产物（约 34MB：characters 591KB、
-                     strokes/ 9574 个按字懒加载、handwrite_index 4.2MB 懒加载）
+  data/              build-data.py 的产物（约 34MB：characters 889KB、
+                     strokes-packs/ 24 个分包按需懒加载、
+                     handwrite_index 4.2MB 懒加载）
 ```
 
 hanzi-writer 的数据与 iOS 版同源（都来自 Make Me a Hanzi / Arphic 授权），

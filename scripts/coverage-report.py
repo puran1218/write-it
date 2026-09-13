@@ -13,7 +13,7 @@ DATA = REPO_ROOT / "static" / "zi" / "data"
 table = json.loads((DATA / "characters.json").read_text("utf-8"))
 supplements = json.loads((DATA / "supplements.json").read_text("utf-8"))
 curriculum = json.loads((DATA / "curriculum.json").read_text("utf-8"))["order"]
-stroke_files = {path.stem for path in (DATA / "strokes").glob("*.json")}
+stroke_files = set(json.loads((DATA / "strokes-manifest.json").read_text("utf-8")).keys())
 
 all_chars = list(table.keys())
 
