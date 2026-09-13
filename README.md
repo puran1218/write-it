@@ -1,12 +1,11 @@
-# 字宝宝 Zi · micro.blog 静态页插件
+# 字宝宝 Zi · Write It — micro.blog 静态页插件
 
-把 iOS 应用 [字宝宝](../minimaxi/)（Zi）的第一期核心体验搬到 Web：查一个字，
-看超大字、听读音、看笔顺，收进字本子。
-以 micro.blog plugin 的形式发布，安装后就是一个静态页面
-`https://你的域名/zi/`，同时也是一个可安装、可离线的 PWA。
-
-设计沿用 iOS 版的「暖纸 + 天蓝 + 字宝宝」设计系统（`Theme.swift` 的 token
-逐项搬进 CSS 变量）；与 [bigtext](../microblog-bigtext/) 插件同一套发布模式。
+**字宝宝（Write It）** 是一个面向低龄儿童的识字与写字小应用：说给我听、
+画给我看、查一查；看笔顺、描红练一练；写对的字收进「字本子」成就册。
+以 micro.blog plugin 的形式发布，安装后就是一个静态页面 `https://你的域名/zi/`，
+同时也是一个可安装、可离线的 PWA。设计沿用 iOS 版的「暖纸 + 天蓝 + 字宝宝」
+设计系统（`Theme.swift` 的 token 逐项搬进 CSS 变量）；与
+[bigtext](../microblog-bigtext/) 插件同一套发布模式。
 
 ## 功能
 

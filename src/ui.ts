@@ -20,7 +20,7 @@ export function tabBarHtml(active: "home" | "book"): string {
   return `
     <nav class="tab-bar">
       <button class="tab-button ${active === "home" ? "tab-button-active" : ""}" data-nav="home">
-        <span class="tab-icon">⌂</span><span class="tab-label">首页</span>
+        <span class="tab-icon">🔍</span><span class="tab-label">找字</span>
       </button>
       <button class="tab-button ${active === "book" ? "tab-button-active" : ""}" data-nav="book">
         <span class="tab-icon">★</span><span class="tab-label">字本子</span>

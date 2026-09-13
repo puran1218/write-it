@@ -5,7 +5,7 @@
     </header>`}function B(n){return`
     <nav class="tab-bar">
       <button class="tab-button ${n==="home"?"tab-button-active":""}" data-nav="home">
-        <span class="tab-icon">⌂</span><span class="tab-label">首页</span>
+        <span class="tab-icon">🔍</span><span class="tab-label">找字</span>
       </button>
       <button class="tab-button ${n==="book"?"tab-button-active":""}" data-nav="book">
         <span class="tab-icon">★</span><span class="tab-label">字本子</span>
