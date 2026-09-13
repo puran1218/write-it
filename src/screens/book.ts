@@ -89,8 +89,8 @@ export async function renderBook(root: HTMLElement, library: LibraryStore): Prom
           "practiced",
           "在练一练里完整写对的字，会变成全彩贴纸贴在这里"
         )}
-        ${sectionHtml("看过了", "打开过详情", viewed, "viewed")}
         ${favorites.length > 0 ? sectionHtml("♥ 我的收藏", "喜欢", favorites, "favorite") : ""}
+        ${sectionHtml("看过了", "打开过详情", viewed, "viewed")}
       </div>
 
       ${tabBarHtml("book")}

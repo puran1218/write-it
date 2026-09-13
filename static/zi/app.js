@@ -48,8 +48,8 @@
 
       <div class="book-sections">
         ${o("✓ 已练会","写对过",r,"practiced","在练一练里完整写对的字，会变成全彩贴纸贴在这里")}
-        ${o("看过了","打开过详情",i,"viewed")}
         ${s.length>0?o("♥ 我的收藏","喜欢",s,"favorite"):""}
+        ${o("看过了","打开过详情",i,"viewed")}
       </div>
 
       ${B("book")}
