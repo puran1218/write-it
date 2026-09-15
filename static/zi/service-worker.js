@@ -9,7 +9,7 @@
 // 约定：src/data-url.ts 里升数据 tag（data-v2…）时，把 DATA_CACHE 同步升位
 //（zi-data-v2…），activate 时会清掉旧数据缓存。
 
-const SHELL_CACHE = "zi-shell-v3";
+const SHELL_CACHE = "zi-shell-v4";
 const DATA_CACHE = "zi-data-v1";
 const DATA_HOST = "cdn.jsdelivr.net";
 
@@ -69,7 +69,7 @@ self.addEventListener("fetch", event => {
     event.respondWith(
       fetch(event.request, { cache: "no-cache" })
         .then(response => {
-          if (response.ok && url.pathname.startsWith(self.registration.scope)) {
+          if (response.ok && event.request.url.startsWith(self.registration.scope)) {
             const copy = response.clone();
             caches.open(SHELL_CACHE).then(cache => cache.put(event.request, copy));
           }

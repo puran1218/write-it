@@ -30,27 +30,27 @@ let supplementsTable: Promise<Record<string, Supplement>> | null = null;
 let curriculumOrder: Promise<string[]> | null = null;
 
 function characters(): Promise<Record<string, { p: string; d?: string; sc?: number; r?: string; st?: string; c?: string[] }>> {
-  charactersTable ??= loadJson("./data/characters.json");
+  charactersTable ??= loadJson("characters.json");
   return charactersTable;
 }
 
 function words(): Promise<Record<string, WordItem[]>> {
-  wordsTable ??= loadJson("./data/words.json");
+  wordsTable ??= loadJson("words.json");
   return wordsTable;
 }
 
 function sentences(): Promise<Record<string, SentenceItem[]>> {
-  sentencesTable ??= loadJson("./data/sentences.json");
+  sentencesTable ??= loadJson("sentences.json");
   return sentencesTable;
 }
 
 function supplements(): Promise<Record<string, Supplement>> {
-  supplementsTable ??= loadJson("./data/supplements.json");
+  supplementsTable ??= loadJson("supplements.json");
   return supplementsTable;
 }
 
 function curriculum(): Promise<string[]> {
-  curriculumOrder ??= loadJson<{ order: string[] }>("./data/curriculum.json").then((data) => data.order);
+  curriculumOrder ??= loadJson<{ order: string[] }>("curriculum.json").then((data) => data.order);
   return curriculumOrder;
 }
 
@@ -73,7 +73,7 @@ const packPromises = new Map<string, Promise<Record<string, RawStrokeData>>>();
 const strokeFileCache = new Map<string, Promise<StrokeFile | null>>();
 
 async function rawStrokeData(character: string): Promise<RawStrokeData | null> {
-  packManifestPromise ??= loadJson("./data/strokes-manifest.json");
+  packManifestPromise ??= loadJson("strokes-manifest.json");
   const manifest = await packManifestPromise;
   const packFile = manifest[character];
   if (!packFile) {
@@ -81,7 +81,7 @@ async function rawStrokeData(character: string): Promise<RawStrokeData | null> {
   }
   let pack = packPromises.get(packFile);
   if (!pack) {
-    pack = loadJson(`./data/${packFile}`);
+    pack = loadJson(packFile);
     packPromises.set(packFile, pack);
   }
   return (await pack)[character] ?? null;

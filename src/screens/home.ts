@@ -8,10 +8,20 @@ import type { LibraryStore } from "../library";
 
 export async function renderHome(root: HTMLElement, library: LibraryStore): Promise<void> {
   const state = library.snapshot;
-  const fallbackStarters = await starterCharacters(6);
+  // CDN 暂时不可达时也不白屏：退到固定起步字，需要数据的功能各自优雅降级
+  let fallbackStarters = ["我", "你", "好", "大", "小", "花"];
+  try {
+    fallbackStarters = await starterCharacters(6);
+  } catch {
+    // 数据加载失败，保留默认起步字
+  }
   const recent = state.recentCharacters.length > 0 ? state.recentCharacters : fallbackStarters;
-  const todayCharacter =
-    (await recommendedTodayCharacter(state.recentCharacters)) ?? fallbackStarters[0] ?? "花";
+  let todayCharacter = fallbackStarters[0] ?? "花";
+  try {
+    todayCharacter = (await recommendedTodayCharacter(state.recentCharacters)) ?? todayCharacter;
+  } catch {
+    // 同上
+  }
 
   root.innerHTML = `
     <div class="screen">
