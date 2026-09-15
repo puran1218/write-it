@@ -97,18 +97,29 @@ npm run serve    # http://localhost:8765/zi/
 注意：必须通过 `/zi/` 子路径访问，模拟 Micro.blog 部署路径。
 改代码用 `npm run watch` 配合 `npm run serve`。
 
-## 发布到 Micro.blog
+## 发布到 Micro.blog（两层仓库架构）
 
-1. 把本仓库推送到 GitHub（`static/zi/` 是构建产物，随仓库一起提交）。
-2. 在 Micro.blog 的 Plug-ins 页面从 GitHub 安装本仓库。
-3. 访问 `https://你的域名/zi/` 使用。
+- **puran1218/write-it**（本仓库）：源码 + 静态数据（source of truth）。
+  数据不在 micro.blog 插件仓库里，而是经 jsDelivr 按版本 tag 分发
+  （`src/data-url.ts` 的 `DATA_BASE_URL` 指向 `@data-v1`）。
+- **puran1218/write-it-microblog**：轻部署壳——`plugin.json` + `static/zi/`
+  的 index/app/styles/Service Worker/图标（不含 `data/`，几百 KB），
+  micro.blog 克隆并发布的是它，访问路径 `/zi/`。
 
-所有资源都是相对路径，放在任何子路径下都能工作。
-改了代码需要更新时：`npm run build` 后连同产物一起推送，
-再到 Micro.blog 里重新拉取插件；如果页面行为没变，
-先把浏览器缓存/旧版 Service Worker 注销再试。
+发布/更新流程：
 
-改了文件结构记得把 `static/zi/service-worker.js` 的 `CACHE_NAME` 升一位。
+1. `npm run data && npm run build`
+2. 数据有变化：`git tag data-v2 && git push --tags`，并同步把
+   `src/data-url.ts` 的 `@data-v1` 和 `static/zi/service-worker.js` 的
+   `zi-data-v1` 各升一位（旧数据缓存会在 SW activate 时清掉）
+3. `scripts/sync-deploy.sh` 把壳文件同步到 `../write-it-microblog`
+4. write-it 提交推送（含 tag）；write-it-microblog 提交推送
+5. micro.blog 的 Plug-ins 页重新拉取插件 → 访问 `https://你的域名/zi/`
+
+离线是**渐进式**的：壳安装后立即可离线；基础字典首次加载后缓存；
+笔顺分包、手写索引首次使用后缓存（数据缓存为 `zi-data-v1`，
+cache-first——数据跟不可变 tag 走）。本地调试想用 `static/zi/data`
+的本地数据：页面 URL 加 `?local-data`。
 
 ## 数据来源与许可
 

@@ -7,6 +7,7 @@
  */
 
 import type { HandwriteCandidate } from "./types";
+import { dataUrl } from "./data-url";
 
 export interface StrokePoint {
   x: number;
@@ -35,7 +36,7 @@ let indexPromise: Promise<IndexEntry[]> | null = null;
 
 function loadIndex(): Promise<IndexEntry[]> {
   // 失败后清掉缓存的 promise，下一次画字时重试拉取
-  indexPromise ??= fetch("./data/handwrite_index.json")
+  indexPromise ??= fetch(dataUrl("handwrite_index.json"))
     .then((response) => {
       if (!response.ok) {
         throw new Error(`handwrite index ${response.status}`);
