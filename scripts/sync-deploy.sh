@@ -7,6 +7,11 @@ set -eu
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEST="${1:-$ROOT/../write-it-microblog}"
 
+if [ ! -f "$DEST/plugin.json" ] || [ ! -d "$DEST/static/zi" ]; then
+  echo "Expected an existing deployment repo at: $DEST" >&2
+  exit 1
+fi
+
 mkdir -p "$DEST/static/zi/icons"
 cp "$ROOT/plugin.json" "$DEST/plugin.json"
 for f in index.html app.js styles.css manifest.webmanifest service-worker.js; do
@@ -14,4 +19,5 @@ for f in index.html app.js styles.css manifest.webmanifest service-worker.js; do
 done
 cp "$ROOT"/static/zi/icons/*.png "$DEST/static/zi/icons/"
 
-echo "已同步到 $DEST —— 记得在 write-it-microblog 里 commit + push"
+sh "$ROOT/scripts/check-deploy.sh" "$DEST"
+echo "已同步到 $DEST —— 请 review 两个仓库的变更后再 commit + push"

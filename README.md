@@ -3,9 +3,7 @@
 **字宝宝（Write It）** 是一个面向低龄儿童的识字与写字小应用：说给我听、
 画给我看、查一查；看笔顺、描红练一练；写对的字收进「字本子」成就册。
 以 micro.blog plugin 的形式发布，安装后就是一个静态页面 `https://你的域名/zi/`，
-同时也是一个可安装、可离线的 PWA。设计沿用 iOS 版的「暖纸 + 天蓝 + 字宝宝」
-设计系统（`Theme.swift` 的 token 逐项搬进 CSS 变量）；与
-[bigtext](../microblog-bigtext/) 插件同一套发布模式。
+同时也是一个可安装、可离线的 PWA。设计沿用 iOS 版的「暖纸 + 天蓝 + 字宝宝」设计系统（`Theme.swift` 的 token 逐项搬进 CSS 变量）。
 
 ## 功能
 
@@ -77,8 +75,10 @@ static/zi/           可直接发布的成品（构建产物 + 数据，均已�
                      handwrite_index 4.2MB 懒加载）
 ```
 
-hanzi-writer 的数据与 iOS 版同源（都来自 Make Me a Hanzi / Arphic 授权），
-`charDataLoader` 直接指向本地 `data/strokes/字.json`，离线可用、无 CDN 依赖。
+hanzi-writer 的笔顺数据与 iOS 版同源（Make Me a Hanzi / Arphic），但当前 Web 版从
+`src/data-url.ts` 配置的 jsDelivr 版本化数据源读取 `strokes-manifest.json` 和
+`strokes-packs/*.json`。`charDataLoader` 使用已经读取的笔顺数据；首次访问需要网络，
+随后可利用 Service Worker 缓存离线使用。
 已知取舍：多音字取字典第一读音参与搜索（如「长」搜 cháng 能中、zhǎng 不能）；
 新补全字的释义为 makemeahanzi 英文短释义，无拆字提示与词语例句（课程 522 字
 仍是精校内容）。结构字段：精校补充优先，其余由 makemeahanzi IDS 拆解式
@@ -106,15 +106,23 @@ npm run serve    # http://localhost:8765/zi/
   的 index/app/styles/Service Worker/图标（不含 `data/`，几百 KB），
   micro.blog 克隆并发布的是它，访问路径 `/zi/`。
 
-发布/更新流程：
+发布/更新流程（数据版本与插件版本彼此独立）：
 
-1. `npm run data && npm run build`
-2. 数据有变化：`git tag data-v2 && git push --tags`，并同步把
-   `src/data-url.ts` 的 `@data-v1` 和 `static/zi/service-worker.js` 的
-   `zi-data-v1` 各升一位（旧数据缓存会在 SW activate 时清掉）
-3. `scripts/sync-deploy.sh` 把壳文件同步到 `../write-it-microblog`
-4. write-it 提交推送（含 tag）；write-it-microblog 提交推送
-5. micro.blog 的 Plug-ins 页重新拉取插件 → 访问 `https://你的域名/zi/`
+1. **仅改 TypeScript/CSS/UI**：运行 `npm ci && npm run build`，无需重新生成 36 MB 数据，也无需升级 `data-v1`。
+2. **数据发生变化时**：运行 `npm ci && npm run data`，验证新数据，提交包含数据的 Git commit；
+   **在提交之后**创建并推送新的不可变 tag（如 `data-v2`）。
+3. 将 `src/data-url.ts` 中的 CDN tag 改为新数据 tag，同时升级
+   `static/zi/service-worker.js` 中的 `DATA_CACHE` 与 `DATA_URL_PREFIX`；
+   重新运行 `npm run build`。
+4. 在主仓库的 `plugin.json` 升级 Micro.blog 插件版本（例如 `2.0.1 → 2.0.2`）。
+   主仓库是插件版本的**唯一来源**，不要单独在部署仓库改版本。
+5. 运行 `sh scripts/sync-deploy.sh`，之后可以再用
+   `sh scripts/check-deploy.sh` 确认两个仓库的部署文件完全一致。
+6. 分别 commit/push 主仓库与 `write-it-microblog`；Micro.blog 中更新插件版本并重建站点，
+   访问 `https://你的域名/zi/` 验证。
+
+部署仓库只应包含 app shell，不应拷贝 `static/zi/data/`。
+当更新 Service Worker 本身时，升级 `SHELL_CACHE`，使新缓存世代与旧版本区分。
 
 离线是**渐进式**的：壳安装后立即可离线；基础字典首次加载后缓存；
 笔顺分包、手写索引首次使用后缓存（数据缓存为 `zi-data-v1`，
@@ -138,3 +146,15 @@ iOS 原版见 [minimaxi](../minimaxi/) 仓库（SwiftUI + SQLite.swift）。
 3. ✅ 画给我看（`OfflineHandwriteRecognitionService` 移植 + 索引懒加载）
 4. ✅ 说给我听（Web Speech API，不支持/拒绝权限时文字兜底；
    iOS 主屏 PWA 模式下的真机验证仍是遗留 QA 项）
+
+## Privacy & third-party data
+
+除语音识别外，查字、手写识别及字本子状态在浏览器内进行；汉字静态数据
+通过 jsDelivr 下载。字本子进度保存在浏览器的 `localStorage` 中，清理站点数据
+或更换设备可能丢失进度。语音识别通过浏览器 Web Speech API 提供，
+具体浏览器可能使用在线识别服务，因此**不能承诺语音完全离线或音频绝不离开设备**。
+不使用麦克风也可以通过文字或手写查字。
+
+第三方字典与笔顺数据有各自的许可证，不能与 Hanzi Writer 代码的 MIT 许可证混为一谈。
+详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。本仓库原创代码的对外授权需要
+另行明确；这份说明不为第三方内容重新授权。
