@@ -7,7 +7,12 @@ import { esc, topBarHtml } from "../ui";
 import type { CharacterInfo } from "../types";
 import type { LibraryStore } from "../library";
 
-export async function renderDetail(root: HTMLElement, character: string, library: LibraryStore): Promise<void> {
+export async function renderDetail(
+  root: HTMLElement,
+  character: string,
+  library: LibraryStore,
+  isCurrent: () => boolean
+): Promise<void> {
   root.innerHTML = `
     <div class="screen">
       ${topBarHtml()}
@@ -20,9 +25,12 @@ export async function renderDetail(root: HTMLElement, character: string, library
   try {
     info = await lookup(character);
   } catch {
-    root.querySelector(".detail-loading")!.textContent = "这个字还没收进来，换个字试试？";
+    if (!isCurrent()) return;
+    root.querySelector(".detail-loading")!.textContent = "查字数据暂时无法加载，请返回后重试。";
     return;
   }
+
+  if (!isCurrent()) return;
 
   library.markViewed(character);
 
