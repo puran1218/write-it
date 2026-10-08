@@ -97,6 +97,26 @@ npm run serve    # http://localhost:8765/zi/
 注意：必须通过 `/zi/` 子路径访问，模拟 Micro.blog 部署路径。
 改代码用 `npm run watch` 配合 `npm run serve`。
 
+## Browser smoke tests
+
+Run the smoke suite against the local `/zi/` static app using **Playwright Chromium**.
+It uses the JSON files already checked into `static/zi/data/` as fixtures, so tests
+do not depend on jsDelivr or your live Micro.blog site.
+
+```sh
+npm ci
+npx playwright install chromium  # one-time browser installation
+npm run build
+npm run test:smoke
+```
+
+The suite covers home rendering, character search without stroke-pack downloads,
+search retries after a simulated HTTP 503, character detail and writing,
+stroke-pack retry, late route responses, and loading a previously visited character
+after going offline. The offline test uses `?local-data` to test the real Service
+Worker without relying on the production CDN. These are browser-level smoke tests,
+not a complete mobile-device compatibility matrix.
+
 ## 发布到 Micro.blog（两层仓库架构）
 
 - **puran1218/write-it**（本仓库）：源码 + 静态数据（source of truth）。
