@@ -3,7 +3,7 @@ name: Write It browser smoke
 on:
   push:
     branches:
-      - review/runtime-resilience-smoke-20261009
+      - main
   pull_request:
     paths:
       - ".github/workflows/runtime-smoke.yml"
@@ -14,39 +14,25 @@ on:
       - "package-lock.json"
       - "playwright.config.mjs"
 
+permissions:
+  contents: read
+
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # Only the named review branch writes compiled release artifacts.
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
-      # The first push of this review branch needs a lockfile refresh.
-      # Thereafter the command should be a no-op.
-      - name: Update lockfile
-        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-      - name: Install pinned dependencies
+      - name: Install locked dependencies
         run: npm ci
-      - name: Typecheck and build deployment JS
+      - name: Typecheck and build the deployment JS
         run: npm run build
-      - name: Verify generated JS and lockfile committed on PRs
-        if: github.event_name == 'pull_request'
-        run: git diff --exit-code -- package-lock.json static/zi/app.js
+      - name: Verify checked-in app.js matches the source
+        run: git diff --exit-code -- static/zi/app.js
       - name: Install test browser
         run: npx playwright install --with-deps chromium
       - name: Run isolated PWA smoke suite
         run: npm run test:smoke
-      - name: Commit generated assets to review branch
-        if: github.event_name == 'push' && github.ref == 'refs/heads/review/runtime-resilience-smoke-20261009'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json static/zi/app.js
-          if ! git diff --cached --quiet; then
-            git commit -m "build: sync generated app and Playwright lockfile [skip ci]"
-            git push origin HEAD:"$GITHUB_REF_NAME"
-          fi
