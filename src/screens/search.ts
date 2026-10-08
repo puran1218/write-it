@@ -1,6 +1,6 @@
 /** 查一查 / 说给我听 — voice lookup + text/pinyin search (port of QuickSearchSheet). */
 
-import { displayPinyin, isChineseCharacter, lookup, searchByPinyin, searchTerm } from "../data";
+import { displayPinyin, isChineseCharacter, lookupPreview, searchByPinyin, searchTerm } from "../data";
 import type { CharacterPreview } from "../types";
 import { goBack, navigate } from "../router";
 import { esc, topBarHtml } from "../ui";
@@ -14,7 +14,7 @@ const VOICE_STATUS_TEXT: Record<VoiceLookupState, string> = {
   failed: "现在暂时不能听你说话，打字也可以。",
 };
 
-export async function renderSearch(root: HTMLElement): Promise<void> {
+export async function renderSearch(root: HTMLElement, isCurrent: () => boolean): Promise<void> {
   const withVoice = voiceSupported();
   root.innerHTML = `
     <div class="screen">
@@ -80,10 +80,12 @@ export async function renderSearch(root: HTMLElement): Promise<void> {
     listening = true;
     voice.start({
       onTranscript: (transcript) => {
+        if (!isCurrent()) return;
         input.value = transcript;
         void performSearch();
       },
       onState: (state) => {
+        if (!isCurrent()) return;
         setVoiceStatus(state);
         if (state !== "listening") {
           listening = false;
@@ -95,6 +97,7 @@ export async function renderSearch(root: HTMLElement): Promise<void> {
   // ---------------------------------------------------------------- 文字查字
 
   root.querySelector('[data-action="clear"]')?.addEventListener("click", () => {
+    ++searchRunId; // Invalidate pending searches before clearing the UI.
     input.value = "";
     results.innerHTML = "";
     message.textContent = "输入汉字或拼音，我来帮你找。";
@@ -102,6 +105,7 @@ export async function renderSearch(root: HTMLElement): Promise<void> {
   });
 
   function showPreviews(previews: CharacterPreview[]): void {
+    if (!isCurrent()) return;
     if (previews.length === 0) {
       results.innerHTML = "";
       message.textContent = "没找到这个字，换个说法试试？";
@@ -129,6 +133,7 @@ export async function renderSearch(root: HTMLElement): Promise<void> {
   async function performSearch(): Promise<void> {
     const id = ++searchRunId;
     const query = input.value.trim();
+    if (!isCurrent()) return;
     if (!query) {
       results.innerHTML = "";
       message.textContent = "输入汉字或拼音，我来帮你找。";
@@ -136,25 +141,27 @@ export async function renderSearch(root: HTMLElement): Promise<void> {
     }
 
     const focus = searchTerm(query);
-    if (isChineseCharacter(focus)) {
-      const info = await lookup(focus);
-      if (id !== searchRunId) {
-        return; // 已有更新的输入，丢弃旧结果
+    try {
+      // A search result needs only characters.json, not the 1 MB+ stroke pack.
+      if (isChineseCharacter(focus)) {
+        const preview = await lookupPreview(focus);
+        if (id !== searchRunId || !isCurrent()) return;
+        if (preview) {
+          showPreviews([preview]);
+        } else {
+          results.innerHTML = "";
+          message.textContent = "这个字还没收进来，换个字试试？";
+        }
+      } else {
+        const previews = await searchByPinyin(query);
+        if (id !== searchRunId || !isCurrent()) return;
+        showPreviews(previews);
       }
-      if (info.pinyin && info.pinyin !== `${focus}0`) {
-        showPreviews([{ character: focus, pinyin: info.pinyin }]);
-        return;
-      }
+    } catch {
+      if (id !== searchRunId || !isCurrent()) return;
       results.innerHTML = "";
-      message.textContent = "这个字还没收进来，换个字试试？";
-      return;
+      message.textContent = "查字数据暂时无法加载，请检查网络后再试一次。";
     }
-
-    const previews = await searchByPinyin(query);
-    if (id !== searchRunId) {
-      return;
-    }
-    showPreviews(previews);
   }
 
   let debounceTimer: number | undefined;
