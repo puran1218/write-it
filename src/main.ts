@@ -12,31 +12,35 @@ import { renderWriting } from "./screens/writing";
 const appRoot = document.getElementById("app")!;
 const library = new LibraryStore();
 
+let renderVersion = 0;
+
 function render(): void {
+  const version = ++renderVersion;
+  const isCurrent = () => version === renderVersion;
   const route = parseHash();
   appRoot.innerHTML = "";
 
   switch (route.screen) {
     case "home":
-      void renderHome(appRoot, library);
+      void renderHome(appRoot, library, isCurrent);
       break;
     case "book":
       void renderBook(appRoot, library);
       break;
     case "search":
-      void renderSearch(appRoot);
+      void renderSearch(appRoot, isCurrent);
       break;
     case "handwrite":
-      void renderHandwrite(appRoot);
+      void renderHandwrite(appRoot, isCurrent);
       break;
     case "detail":
-      void renderDetail(appRoot, route.character, library);
+      void renderDetail(appRoot, route.character, library, isCurrent);
       break;
     case "strokes":
-      void renderWriting(appRoot, route.character, "demo", library);
+      void renderWriting(appRoot, route.character, "demo", library, isCurrent);
       break;
     case "practice":
-      void renderWriting(appRoot, route.character, "practice", library);
+      void renderWriting(appRoot, route.character, "practice", library, isCurrent);
       break;
   }
 }
