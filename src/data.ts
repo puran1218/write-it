@@ -23,36 +23,30 @@ async function loadJson<T>(relativePath: string): Promise<T> {
 // ---------------------------------------------------------------------------
 // Bundled tables (loaded once, on first use)
 
-let charactersTable: Promise<Record<string, { p: string; d?: string; sc?: number; r?: string; st?: string; c?: string[] }>> | null = null;
-let wordsTable: Promise<Record<string, WordItem[]>> | null = null;
-let sentencesTable: Promise<Record<string, SentenceItem[]>> | null = null;
-let supplementsTable: Promise<Record<string, Supplement>> | null = null;
-let curriculumOrder: Promise<string[]> | null = null;
-
-function characters(): Promise<Record<string, { p: string; d?: string; sc?: number; r?: string; st?: string; c?: string[] }>> {
-  charactersTable ??= loadJson("characters.json");
-  return charactersTable;
+// Reuse successful requests; forget rejected promises so reconnecting can recover.
+function retryable<T>(load: () => Promise<T>): () => Promise<T> {
+  let pending: Promise<T> | null = null;
+  return () => {
+    pending ??= load().catch((error: unknown) => {
+      pending = null;
+      throw error;
+    });
+    return pending;
+  };
 }
 
-function words(): Promise<Record<string, WordItem[]>> {
-  wordsTable ??= loadJson("words.json");
-  return wordsTable;
-}
+type CharacterTable = Record<
+  string,
+  { p: string; d?: string; sc?: number; r?: string; st?: string; c?: string[] }
+>;
 
-function sentences(): Promise<Record<string, SentenceItem[]>> {
-  sentencesTable ??= loadJson("sentences.json");
-  return sentencesTable;
-}
-
-function supplements(): Promise<Record<string, Supplement>> {
-  supplementsTable ??= loadJson("supplements.json");
-  return supplementsTable;
-}
-
-function curriculum(): Promise<string[]> {
-  curriculumOrder ??= loadJson<{ order: string[] }>("curriculum.json").then((data) => data.order);
-  return curriculumOrder;
-}
+const characters = retryable(() => loadJson<CharacterTable>("characters.json"));
+const words = retryable(() => loadJson<Record<string, WordItem[]>>("words.json"));
+const sentences = retryable(() => loadJson<Record<string, SentenceItem[]>>("sentences.json"));
+const supplements = retryable(() => loadJson<Record<string, Supplement>>("supplements.json"));
+const curriculum = retryable(async () =>
+  (await loadJson<{ order: string[] }>("curriculum.json")).order
+);
 
 // ---------------------------------------------------------------------------
 // Stroke files（按分包懒加载：manifest 记录 字 → 分包，包内按字取数据）
@@ -68,20 +62,24 @@ interface RawStrokeData {
   medians?: number[][][];
 }
 
-let packManifestPromise: Promise<Record<string, string>> | null = null;
+const getPackManifest = retryable(() =>
+  loadJson<Record<string, string>>("strokes-manifest.json")
+);
 const packPromises = new Map<string, Promise<Record<string, RawStrokeData>>>();
 const strokeFileCache = new Map<string, Promise<StrokeFile | null>>();
 
 async function rawStrokeData(character: string): Promise<RawStrokeData | null> {
-  packManifestPromise ??= loadJson("strokes-manifest.json");
-  const manifest = await packManifestPromise;
+  const manifest = await getPackManifest();
   const packFile = manifest[character];
   if (!packFile) {
     return null;
   }
   let pack = packPromises.get(packFile);
   if (!pack) {
-    pack = loadJson(packFile);
+    pack = loadJson<Record<string, RawStrokeData>>(packFile).catch((error: unknown) => {
+      packPromises.delete(packFile);
+      throw error;
+    });
     packPromises.set(packFile, pack);
   }
   return (await pack)[character] ?? null;
@@ -93,7 +91,10 @@ export function loadStrokeFile(character: string): Promise<StrokeFile | null> {
   if (!pending) {
     pending = rawStrokeData(character)
       .then((raw) => (raw ? { ...raw, character } : null))
-      .catch(() => null);
+      .catch((error: unknown) => {
+        strokeFileCache.delete(character);
+        throw error;
+      });
     strokeFileCache.set(character, pending);
   }
   return pending;
@@ -140,6 +141,12 @@ export async function lookup(character: string): Promise<CharacterInfo> {
     words: wordList[character] ?? [],
     sentences: sentenceList[character] ?? [],
   };
+}
+
+/** Search preview needs only the small character table, never a stroke pack. */
+export async function lookupPreview(character: string): Promise<CharacterPreview | null> {
+  const entry = (await characters())[character];
+  return entry?.p ? { character, pinyin: entry.p } : null;
 }
 
 // ---------------------------------------------------------------------------

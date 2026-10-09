@@ -9,12 +9,14 @@
     "build": "npm run typecheck && esbuild src/main.ts --bundle --format=iife --charset=utf8 --minify --outfile=static/zi/app.js",
     "watch": "esbuild src/main.ts --bundle --format=iife --charset=utf8 --outfile=static/zi/app.js --watch",
     "serve": "python3 -m http.server 8765 --directory static",
-    "predeploy": "npm run data && npm run build"
+    "predeploy": "npm run data && npm run build",
+    "test:smoke": "playwright test"
   },
   "devDependencies": {
     "esbuild": "^0.24.0",
     "hanzi-writer-data": "^2.0.1",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "@playwright/test": "1.64.0"
   },
   "dependencies": {
     "hanzi-writer": "^3.7.3"

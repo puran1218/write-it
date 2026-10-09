@@ -1,0 +1,38 @@
+name: Write It browser smoke
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - ".github/workflows/runtime-smoke.yml"
+      - "src/**"
+      - "tests/**"
+      - "static/zi/**"
+      - "package.json"
+      - "package-lock.json"
+      - "playwright.config.mjs"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Typecheck and build the deployment JS
+        run: npm run build
+      - name: Verify checked-in app.js matches the source
+        run: git diff --exit-code -- static/zi/app.js
+      - name: Install test browser
+        run: npx playwright install --with-deps chromium
+      - name: Run isolated PWA smoke suite
+        run: npm run test:smoke

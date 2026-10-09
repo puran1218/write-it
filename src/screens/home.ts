@@ -6,7 +6,7 @@ import { esc, tabBarHtml } from "../ui";
 import { mascotSvg } from "../components/mascot";
 import type { LibraryStore } from "../library";
 
-export async function renderHome(root: HTMLElement, library: LibraryStore): Promise<void> {
+export async function renderHome(root: HTMLElement, library: LibraryStore, isCurrent: () => boolean): Promise<void> {
   const state = library.snapshot;
   // CDN 暂时不可达时也不白屏：退到固定起步字，需要数据的功能各自优雅降级
   let fallbackStarters = ["我", "你", "好", "大", "小", "花"];
@@ -22,6 +22,8 @@ export async function renderHome(root: HTMLElement, library: LibraryStore): Prom
   } catch {
     // 同上
   }
+
+  if (!isCurrent()) return;
 
   root.innerHTML = `
     <div class="screen">

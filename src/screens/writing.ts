@@ -1,7 +1,7 @@
 /** 写字屏 — 笔顺演示 + 练一练 合并为一个屏幕，顶部固定模式切换。 */
 
 import type { QuizOptions, StrokeData } from "hanzi-writer";
-import { loadStrokeFile } from "../data";
+import { loadStrokeFile, type StrokeFile } from "../data";
 import { goBack } from "../router";
 import { esc } from "../ui";
 import { celebrate, tianGridSvg } from "../components/stroke-view";
@@ -19,7 +19,8 @@ export async function renderWriting(
   root: HTMLElement,
   character: string,
   initialMode: WritingMode,
-  library: LibraryStore
+  library: LibraryStore,
+  isCurrent: () => boolean
 ): Promise<void> {
   root.innerHTML = `
     <div class="screen">
@@ -49,6 +50,7 @@ export async function renderWriting(
 
   let mode: WritingMode = initialMode;
   let modeRunId = 0;
+  let data: StrokeFile | null = null;
 
   function setMode(next: WritingMode): void {
     if (mode === next) {
@@ -59,14 +61,28 @@ export async function renderWriting(
     for (const button of tabButtons) {
       button.classList.toggle("mode-tab-active", button.dataset.mode === mode);
     }
-    renderMode();
+    if (data) renderMode(); // Tabs can be selected before the stroke pack arrives.
   }
 
   for (const button of tabButtons) {
     button.addEventListener("click", () => setMode(button.dataset.mode as WritingMode));
   }
 
-  const data = await loadStrokeFile(character);
+  try {
+    data = await loadStrokeFile(character);
+  } catch {
+    if (!isCurrent()) return;
+    body.innerHTML = `
+      <div class="strokes-status">笔顺暂时无法加载，请检查网络后重试。</div>
+      <div class="strokes-actions">
+        <button class="action-button action-blue" data-action="retry">↺ 重新加载</button>
+      </div>`;
+    body.querySelector('[data-action="retry"]')?.addEventListener("click", () => {
+      if (isCurrent()) void renderWriting(root, character, mode, library, isCurrent);
+    });
+    return;
+  }
+  if (!isCurrent()) return;
   if (!data || data.strokes.length === 0) {
     body.innerHTML = `<div class="strokes-status">这个字的笔顺还没收进来。</div>`;
     return;
@@ -125,12 +141,13 @@ export async function renderWriting(
       if (completed >= total) {
         completed = 0;
         await writer.hideCharacter({ duration: 200 });
+        if (id !== modeRunId || !isCurrent() || !target.isConnected) return;
       }
 
       for (; completed < total; completed += 1) {
         updateStatus();
         await writer.animateStroke(completed);
-        if (id !== modeRunId || !target.isConnected) {
+        if (id !== modeRunId || !isCurrent() || !target.isConnected) {
           playing = false;
           return;
         }
@@ -171,7 +188,7 @@ export async function renderWriting(
       highlightOnComplete: true,
       acceptBackwardsStrokes: false,
       onCorrectStroke: (strokeData: StrokeData) => {
-        if (id !== modeRunId) return;
+        if (id !== modeRunId || !isCurrent()) return;
         statusEl.classList.remove("strokes-status-done");
         statusEl.textContent =
           strokeData.strokesRemaining > 0
@@ -202,6 +219,7 @@ export async function renderWriting(
       statusEl.classList.remove("strokes-status-done");
       statusEl.textContent = PRACTICE_STATUS_IDLE;
       await writer.hideCharacter({ duration: 200 });
+      if (id !== modeRunId || !isCurrent() || !target.isConnected) return;
       writer.quiz(quizOptions);
     }
 

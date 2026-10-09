@@ -9,7 +9,7 @@ import { tianGridSvg } from "../components/stroke-view";
 
 const RECOGNIZE_IDLE_MS = 600;
 
-export async function renderHandwrite(root: HTMLElement): Promise<void> {
+export async function renderHandwrite(root: HTMLElement, isCurrent: () => boolean): Promise<void> {
   root.innerHTML = `
     <div class="screen">
       <header class="top-bar">
@@ -94,7 +94,7 @@ export async function renderHandwrite(root: HTMLElement): Promise<void> {
 
     try {
       const candidates = await recognize(strokes);
-      if (id !== runId || !canvasCard.isConnected) {
+      if (id !== runId || !isCurrent() || !canvasCard.isConnected) {
         return;
       }
       progress.hidden = true;
