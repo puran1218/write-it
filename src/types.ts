@@ -29,10 +29,19 @@ export interface Supplement {
   h?: string;
 }
 
+/** Reviewed child-friendly content for one reading of a polyphonic character. */
+export interface PolyphonicReading {
+  p: string;
+  meaning: string;
+  words: WordItem[];
+}
+
 /** Everything known about one character — the web twin of CharacterInfo. */
 export interface CharacterInfo {
   character: string;
   pinyin: string;
+  pronunciations: string[];
+  readings: PolyphonicReading[];
   definition: string | null;
   radical: string | null;
   structure: string | null;
@@ -65,4 +74,5 @@ export interface HandwriteCandidate {
 export interface CharacterPreview {
   character: string;
   pinyin: string;
+  pronunciations?: string[];
 }
