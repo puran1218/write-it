@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feat/polyphonic-experience
   pull_request:
     paths:
       - ".github/workflows/runtime-smoke.yml"
@@ -18,7 +19,7 @@ on:
       - "playwright.config.mjs"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   smoke:
@@ -37,7 +38,19 @@ jobs:
         run: npm run build
       - name: Verify checked-in app.js matches the source
         run: git diff --exit-code -- static/zi/app.js
+      - name: Generate staging polyphonic fixtures
+        run: python3 scripts/build-polyphonic.py --write
       - name: Install test browser
         run: npx playwright install --with-deps chromium
       - name: Run isolated PWA smoke suite
         run: npm run test:smoke
+      - name: Commit compiled JS to experience branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/polyphonic-experience'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add static/zi/app.js
+          if ! git diff --cached --quiet; then
+            git commit -m "build: sync polyphonic app.js [skip ci]"
+            git push origin HEAD:"$GITHUB_REF_NAME"
+          fi
