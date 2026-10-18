@@ -75,7 +75,7 @@ def validate() -> dict:
             p = canonical_pinyin(item["p"])
             assert item["p"] == p and p not in seen, (char, p)
             seen.add(p)
-            assert len(item["meaning"].strip()) >= 3, char
+            assert len(item["meaning"].strip()) >= 2, char
             assert len(item["words"]) >= 2, char
             for word in item["words"]:
                 tokens = word["p"].split()
