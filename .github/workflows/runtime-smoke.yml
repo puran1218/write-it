@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - feat/polyphonic-data-v2-release
   pull_request:
     paths:
       - ".github/workflows/runtime-smoke.yml"
@@ -19,7 +18,7 @@ on:
       - "playwright.config.mjs"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   smoke:
@@ -32,26 +31,17 @@ jobs:
           cache: npm
       - name: Validate polyphonic data
         run: python3 -m unittest discover -s tests -p 'test_polyphonic.py'
+      - name: Verify committed data-v2 snapshot
+        run: python3 scripts/build-polyphonic.py --check
       - name: Install locked dependencies
         run: npm ci
       - name: Typecheck and build the deployment JS
         run: npm run build
       - name: Verify checked-in app.js matches the source
-        if: github.event_name == 'pull_request'
         run: git diff --exit-code -- static/zi/app.js
-      - name: Generate staging polyphonic fixtures
-        run: python3 scripts/build-polyphonic.py --write
+      - name: Verify no generated data changes
+        run: git diff --exit-code -- static/zi/data/characters.json static/zi/data/polyphonic.json
       - name: Install test browser
         run: npx playwright install --with-deps chromium
       - name: Run isolated PWA smoke suite
         run: npm run test:smoke
-      - name: Commit staged v2 dataset and compiled JS
-        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/polyphonic-data-v2-release'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add static/zi/app.js static/zi/data/characters.json static/zi/data/polyphonic.json
-          if ! git diff --cached --quiet; then
-            git commit -m "build: record approved polyphonic data-v2 snapshot [skip ci]"
-            git push origin HEAD:"$GITHUB_REF_NAME"
-          fi
