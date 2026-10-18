@@ -1,0 +1,1040 @@
+{
+  "schemaVersion": 1,
+  "policy": "Only approved entries are shipped in polyphonic.json; other entries remain editorial drafts. Examples and child-facing meanings are newly written, not copied from upstream dictionaries.",
+  "entries": {
+    "缝": {
+      "status": "approved",
+      "source": "https://www.zdic.net/hans/%E7%BC%9D",
+      "readings": [
+        {
+          "p": "féng",
+          "meaning": "用针线把东西连起来",
+          "words": [
+            {
+              "w": "缝补",
+              "p": "féng bǔ"
+            },
+            {
+              "w": "缝制",
+              "p": "féng zhì"
+            }
+          ]
+        },
+        {
+          "p": "fèng",
+          "meaning": "两样东西之间的空隙或接缝",
+          "words": [
+            {
+              "w": "门缝",
+              "p": "mén fèng"
+            },
+            {
+              "w": "裂缝",
+              "p": "liè fèng"
+            }
+          ]
+        }
+      ]
+    },
+    "长": {
+      "status": "approved",
+      "source": "https://www.zdic.net/hans/%E9%95%BF",
+      "readings": [
+        {
+          "p": "cháng",
+          "meaning": "长度大，和短相对",
+          "words": [
+            {
+              "w": "长短",
+              "p": "cháng duǎn"
+            },
+            {
+              "w": "长城",
+              "p": "cháng chéng"
+            }
+          ]
+        },
+        {
+          "p": "zhǎng",
+          "meaning": "长大、成长，或比别人年长",
+          "words": [
+            {
+              "w": "长大",
+              "p": "zhǎng dà"
+            },
+            {
+              "w": "家长",
+              "p": "jiā zhǎng"
+            }
+          ]
+        }
+      ]
+    },
+    "行": {
+      "status": "approved",
+      "source": "https://www.zdic.net/hans/%E8%A1%8C",
+      "readings": [
+        {
+          "p": "xíng",
+          "meaning": "走路，或者表示可以",
+          "words": [
+            {
+              "w": "行走",
+              "p": "xíng zǒu"
+            },
+            {
+              "w": "旅行",
+              "p": "lǚ xíng"
+            }
+          ]
+        },
+        {
+          "p": "háng",
+          "meaning": "一排，或某种行业",
+          "words": [
+            {
+              "w": "银行",
+              "p": "yín háng"
+            },
+            {
+              "w": "行列",
+              "p": "háng liè"
+            }
+          ]
+        }
+      ]
+    },
+    "重": {
+      "status": "approved",
+      "source": "https://www.zdic.net/hans/%E9%87%8D",
+      "readings": [
+        {
+          "p": "zhòng",
+          "meaning": "分量大，或很重要",
+          "words": [
+            {
+              "w": "重量",
+              "p": "zhòng liàng"
+            },
+            {
+              "w": "重要",
+              "p": "zhòng yào"
+            }
+          ]
+        },
+        {
+          "p": "chóng",
+          "meaning": "再一次，或一层又一层",
+          "words": [
+            {
+              "w": "重新",
+              "p": "chóng xīn"
+            },
+            {
+              "w": "重复",
+              "p": "chóng fù"
+            }
+          ]
+        }
+      ]
+    },
+    "乐": {
+      "status": "approved",
+      "source": "https://www.zdic.net/hans/%E4%B9%90",
+      "readings": [
+        {
+          "p": "lè",
+          "meaning": "开心、快乐",
+          "words": [
+            {
+              "w": "快乐",
+              "p": "kuài lè"
+            },
+            {
+              "w": "乐趣",
+              "p": "lè qù"
+            }
+          ]
+        },
+        {
+          "p": "yuè",
+          "meaning": "有节奏、有旋律的声音",
+          "words": [
+            {
+              "w": "音乐",
+              "p": "yīn yuè"
+            },
+            {
+              "w": "乐器",
+              "p": "yuè qì"
+            }
+          ]
+        }
+      ]
+    },
+    "觉": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E8%A7%89",
+      "readings": [
+        {
+          "p": "jué",
+          "meaning": "感觉到、发现",
+          "words": [
+            {
+              "w": "感觉",
+              "p": "gǎn jué"
+            },
+            {
+              "w": "觉察",
+              "p": "jué chá"
+            }
+          ]
+        },
+        {
+          "p": "jiào",
+          "meaning": "睡眠",
+          "words": [
+            {
+              "w": "睡觉",
+              "p": "shuì jiào"
+            },
+            {
+              "w": "午觉",
+              "p": "wǔ jiào"
+            }
+          ]
+        }
+      ]
+    },
+    "得": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E5%BE%97",
+      "readings": [
+        {
+          "p": "dé",
+          "meaning": "得到、获得",
+          "words": [
+            {
+              "w": "得到",
+              "p": "dé dào"
+            },
+            {
+              "w": "获得",
+              "p": "huò dé"
+            }
+          ]
+        },
+        {
+          "p": "děi",
+          "meaning": "需要、必须",
+          "words": [
+            {
+              "w": "得去",
+              "p": "děi qù"
+            },
+            {
+              "w": "得走",
+              "p": "děi zǒu"
+            }
+          ]
+        },
+        {
+          "p": "de",
+          "meaning": "跟在动词或形容词后，说明情况",
+          "words": [
+            {
+              "w": "跑得快",
+              "p": "pǎo de kuài"
+            },
+            {
+              "w": "写得好",
+              "p": "xiě de hǎo"
+            }
+          ]
+        }
+      ]
+    },
+    "地": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E5%9C%B0",
+      "readings": [
+        {
+          "p": "dì",
+          "meaning": "地面、土地或地方",
+          "words": [
+            {
+              "w": "地球",
+              "p": "dì qiú"
+            },
+            {
+              "w": "土地",
+              "p": "tǔ dì"
+            }
+          ]
+        },
+        {
+          "p": "de",
+          "meaning": "连接后面的动作，说明怎样做",
+          "words": [
+            {
+              "w": "轻轻地",
+              "p": "qīng qīng de"
+            },
+            {
+              "w": "高兴地",
+              "p": "gāo xìng de"
+            }
+          ]
+        }
+      ]
+    },
+    "还": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E8%BF%98",
+      "readings": [
+        {
+          "p": "hái",
+          "meaning": "仍然，或者表示另外还有",
+          "words": [
+            {
+              "w": "还有",
+              "p": "hái yǒu"
+            },
+            {
+              "w": "还没",
+              "p": "hái méi"
+            }
+          ]
+        },
+        {
+          "p": "huán",
+          "meaning": "把东西交回去",
+          "words": [
+            {
+              "w": "还书",
+              "p": "huán shū"
+            },
+            {
+              "w": "归还",
+              "p": "guī huán"
+            }
+          ]
+        }
+      ]
+    },
+    "为": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E4%B8%BA",
+      "readings": [
+        {
+          "p": "wéi",
+          "meaning": "成为、担任或做某件事",
+          "words": [
+            {
+              "w": "成为",
+              "p": "chéng wéi"
+            },
+            {
+              "w": "行为",
+              "p": "xíng wéi"
+            }
+          ]
+        },
+        {
+          "p": "wèi",
+          "meaning": "为了某个目的或某个人",
+          "words": [
+            {
+              "w": "为了",
+              "p": "wèi le"
+            },
+            {
+              "w": "因为",
+              "p": "yīn wèi"
+            }
+          ]
+        }
+      ]
+    },
+    "种": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E7%A7%8D",
+      "readings": [
+        {
+          "p": "zhǒng",
+          "meaning": "种子，或种类",
+          "words": [
+            {
+              "w": "种子",
+              "p": "zhǒng zi"
+            },
+            {
+              "w": "品种",
+              "p": "pǐn zhǒng"
+            }
+          ]
+        },
+        {
+          "p": "zhòng",
+          "meaning": "把种子种到地里",
+          "words": [
+            {
+              "w": "种树",
+              "p": "zhòng shù"
+            },
+            {
+              "w": "种花",
+              "p": "zhòng huā"
+            }
+          ]
+        }
+      ]
+    },
+    "发": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E5%8F%91",
+      "readings": [
+        {
+          "p": "fā",
+          "meaning": "发出、送出或发现",
+          "words": [
+            {
+              "w": "发现",
+              "p": "fā xiàn"
+            },
+            {
+              "w": "出发",
+              "p": "chū fā"
+            }
+          ]
+        },
+        {
+          "p": "fà",
+          "meaning": "头发",
+          "words": [
+            {
+              "w": "发型",
+              "p": "fà xíng"
+            },
+            {
+              "w": "理发",
+              "p": "lǐ fà"
+            }
+          ]
+        }
+      ]
+    },
+    "好": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E5%A5%BD",
+      "readings": [
+        {
+          "p": "hǎo",
+          "meaning": "好看、好用或友好",
+          "words": [
+            {
+              "w": "好看",
+              "p": "hǎo kàn"
+            },
+            {
+              "w": "你好",
+              "p": "nǐ hǎo"
+            }
+          ]
+        },
+        {
+          "p": "hào",
+          "meaning": "喜欢、爱好",
+          "words": [
+            {
+              "w": "爱好",
+              "p": "ài hào"
+            },
+            {
+              "w": "好奇",
+              "p": "hào qí"
+            }
+          ]
+        }
+      ]
+    },
+    "藏": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E8%97%8F",
+      "readings": [
+        {
+          "p": "cáng",
+          "meaning": "把东西藏起来",
+          "words": [
+            {
+              "w": "收藏",
+              "p": "shōu cáng"
+            },
+            {
+              "w": "躲藏",
+              "p": "duǒ cáng"
+            }
+          ]
+        },
+        {
+          "p": "zàng",
+          "meaning": "用于西藏等专有名称",
+          "words": [
+            {
+              "w": "西藏",
+              "p": "xī zàng"
+            },
+            {
+              "w": "藏族",
+              "p": "zàng zú"
+            }
+          ]
+        }
+      ]
+    },
+    "朝": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E6%9C%9D",
+      "readings": [
+        {
+          "p": "cháo",
+          "meaning": "面对某个方向，或朝代",
+          "words": [
+            {
+              "w": "朝向",
+              "p": "cháo xiàng"
+            },
+            {
+              "w": "朝代",
+              "p": "cháo dài"
+            }
+          ]
+        },
+        {
+          "p": "zhāo",
+          "meaning": "早晨",
+          "words": [
+            {
+              "w": "朝霞",
+              "p": "zhāo xiá"
+            },
+            {
+              "w": "今朝",
+              "p": "jīn zhāo"
+            }
+          ]
+        }
+      ]
+    },
+    "背": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E8%83%8C",
+      "readings": [
+        {
+          "p": "bēi",
+          "meaning": "用背驮着东西",
+          "words": [
+            {
+              "w": "背起",
+              "p": "bēi qǐ"
+            },
+            {
+              "w": "背着",
+              "p": "bēi zhe"
+            }
+          ]
+        },
+        {
+          "p": "bèi",
+          "meaning": "身体的背面，或背诵",
+          "words": [
+            {
+              "w": "后背",
+              "p": "hòu bèi"
+            },
+            {
+              "w": "背诵",
+              "p": "bèi sòng"
+            }
+          ]
+        }
+      ]
+    },
+    "倒": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E5%80%92",
+      "readings": [
+        {
+          "p": "dǎo",
+          "meaning": "站不稳而倒下",
+          "words": [
+            {
+              "w": "摔倒",
+              "p": "shuāi dǎo"
+            },
+            {
+              "w": "跌倒",
+              "p": "diē dǎo"
+            }
+          ]
+        },
+        {
+          "p": "dào",
+          "meaning": "把容器里的东西倒出来",
+          "words": [
+            {
+              "w": "倒水",
+              "p": "dào shuǐ"
+            },
+            {
+              "w": "倒茶",
+              "p": "dào chá"
+            }
+          ]
+        }
+      ]
+    },
+    "教": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E6%95%99",
+      "readings": [
+        {
+          "p": "jiāo",
+          "meaning": "把知识教给别人",
+          "words": [
+            {
+              "w": "教书",
+              "p": "jiāo shū"
+            },
+            {
+              "w": "教给",
+              "p": "jiāo gěi"
+            }
+          ]
+        },
+        {
+          "p": "jiào",
+          "meaning": "教育、教室等词里的读音",
+          "words": [
+            {
+              "w": "教室",
+              "p": "jiào shì"
+            },
+            {
+              "w": "教育",
+              "p": "jiào yù"
+            }
+          ]
+        }
+      ]
+    },
+    "数": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E6%95%B0",
+      "readings": [
+        {
+          "p": "shǔ",
+          "meaning": "一个一个计算",
+          "words": [
+            {
+              "w": "数一数",
+              "p": "shǔ yī shǔ"
+            },
+            {
+              "w": "数数",
+              "p": "shǔ shù"
+            }
+          ]
+        },
+        {
+          "p": "shù",
+          "meaning": "数字、数量",
+          "words": [
+            {
+              "w": "数学",
+              "p": "shù xué"
+            },
+            {
+              "w": "数字",
+              "p": "shù zì"
+            }
+          ]
+        }
+      ]
+    },
+    "只": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E5%8F%AA",
+      "readings": [
+        {
+          "p": "zhǐ",
+          "meaning": "只有、仅仅",
+          "words": [
+            {
+              "w": "只有",
+              "p": "zhǐ yǒu"
+            },
+            {
+              "w": "只是",
+              "p": "zhǐ shì"
+            }
+          ]
+        },
+        {
+          "p": "zhī",
+          "meaning": "用于一只动物等数量",
+          "words": [
+            {
+              "w": "一只",
+              "p": "yì zhī"
+            },
+            {
+              "w": "两只",
+              "p": "liǎng zhī"
+            }
+          ]
+        }
+      ]
+    },
+    "转": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E8%BD%AC",
+      "readings": [
+        {
+          "p": "zhuǎn",
+          "meaning": "改变方向、转过身",
+          "words": [
+            {
+              "w": "转身",
+              "p": "zhuǎn shēn"
+            },
+            {
+              "w": "转弯",
+              "p": "zhuǎn wān"
+            }
+          ]
+        },
+        {
+          "p": "zhuàn",
+          "meaning": "围着中心旋转",
+          "words": [
+            {
+              "w": "转圈",
+              "p": "zhuàn quān"
+            },
+            {
+              "w": "自转",
+              "p": "zì zhuàn"
+            }
+          ]
+        }
+      ]
+    },
+    "分": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E5%88%86",
+      "readings": [
+        {
+          "p": "fēn",
+          "meaning": "把东西分开",
+          "words": [
+            {
+              "w": "分开",
+              "p": "fēn kāi"
+            },
+            {
+              "w": "分别",
+              "p": "fēn bié"
+            }
+          ]
+        },
+        {
+          "p": "fèn",
+          "meaning": "一部分，或成分",
+          "words": [
+            {
+              "w": "水分",
+              "p": "shuǐ fèn"
+            },
+            {
+              "w": "成分",
+              "p": "chéng fèn"
+            }
+          ]
+        }
+      ]
+    },
+    "空": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E7%A9%BA",
+      "readings": [
+        {
+          "p": "kōng",
+          "meaning": "里面没有东西，或者天空",
+          "words": [
+            {
+              "w": "天空",
+              "p": "tiān kōng"
+            },
+            {
+              "w": "空气",
+              "p": "kōng qì"
+            }
+          ]
+        },
+        {
+          "p": "kòng",
+          "meaning": "空着、有时间",
+          "words": [
+            {
+              "w": "空闲",
+              "p": "kòng xián"
+            },
+            {
+              "w": "有空",
+              "p": "yǒu kòng"
+            }
+          ]
+        }
+      ]
+    },
+    "便": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E4%BE%BF",
+      "readings": [
+        {
+          "p": "biàn",
+          "meaning": "方便、顺便",
+          "words": [
+            {
+              "w": "方便",
+              "p": "fāng biàn"
+            },
+            {
+              "w": "顺便",
+              "p": "shùn biàn"
+            }
+          ]
+        },
+        {
+          "p": "pián",
+          "meaning": "便宜这个词中的读音",
+          "words": [
+            {
+              "w": "便宜",
+              "p": "pián yi"
+            },
+            {
+              "w": "占便宜",
+              "p": "zhàn pián yi"
+            }
+          ]
+        }
+      ]
+    },
+    "都": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E9%83%BD",
+      "readings": [
+        {
+          "p": "dōu",
+          "meaning": "表示全部",
+          "words": [
+            {
+              "w": "都是",
+              "p": "dōu shì"
+            },
+            {
+              "w": "都有",
+              "p": "dōu yǒu"
+            }
+          ]
+        },
+        {
+          "p": "dū",
+          "meaning": "城市中的首都等词",
+          "words": [
+            {
+              "w": "首都",
+              "p": "shǒu dū"
+            },
+            {
+              "w": "都市",
+              "p": "dū shì"
+            }
+          ]
+        }
+      ]
+    },
+    "当": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E5%BD%93",
+      "readings": [
+        {
+          "p": "dāng",
+          "meaning": "当心、担任或正在",
+          "words": [
+            {
+              "w": "当心",
+              "p": "dāng xīn"
+            },
+            {
+              "w": "当家",
+              "p": "dāng jiā"
+            }
+          ]
+        },
+        {
+          "p": "dàng",
+          "meaning": "当作、看成",
+          "words": [
+            {
+              "w": "当作",
+              "p": "dàng zuò"
+            },
+            {
+              "w": "恰当",
+              "p": "qià dàng"
+            }
+          ]
+        }
+      ]
+    },
+    "弹": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E5%BC%B9",
+      "readings": [
+        {
+          "p": "tán",
+          "meaning": "弹奏或弹跳",
+          "words": [
+            {
+              "w": "弹琴",
+              "p": "tán qín"
+            },
+            {
+              "w": "弹跳",
+              "p": "tán tiào"
+            }
+          ]
+        },
+        {
+          "p": "dàn",
+          "meaning": "子弹等物品",
+          "words": [
+            {
+              "w": "子弹",
+              "p": "zǐ dàn"
+            },
+            {
+              "w": "炮弹",
+              "p": "pào dàn"
+            }
+          ]
+        }
+      ]
+    },
+    "角": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E8%A7%92",
+      "readings": [
+        {
+          "p": "jiǎo",
+          "meaning": "物体的角或角落",
+          "words": [
+            {
+              "w": "角落",
+              "p": "jiǎo luò"
+            },
+            {
+              "w": "直角",
+              "p": "zhí jiǎo"
+            }
+          ]
+        },
+        {
+          "p": "jué",
+          "meaning": "戏剧中的人物或角色",
+          "words": [
+            {
+              "w": "角色",
+              "p": "jué sè"
+            },
+            {
+              "w": "主角",
+              "p": "zhǔ jué"
+            }
+          ]
+        }
+      ]
+    },
+    "传": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E4%BC%A0",
+      "readings": [
+        {
+          "p": "chuán",
+          "meaning": "传递、传播",
+          "words": [
+            {
+              "w": "传说",
+              "p": "chuán shuō"
+            },
+            {
+              "w": "传递",
+              "p": "chuán dì"
+            }
+          ]
+        },
+        {
+          "p": "zhuàn",
+          "meaning": "记载人物事迹的文字",
+          "words": [
+            {
+              "w": "传记",
+              "p": "zhuàn jì"
+            },
+            {
+              "w": "自传",
+              "p": "zì zhuàn"
+            }
+          ]
+        }
+      ]
+    },
+    "处": {
+      "status": "draft",
+      "source": "https://www.zdic.net/hans/%E5%A4%84",
+      "readings": [
+        {
+          "p": "chǔ",
+          "meaning": "处理、相处",
+          "words": [
+            {
+              "w": "处理",
+              "p": "chǔ lǐ"
+            },
+            {
+              "w": "相处",
+              "p": "xiāng chǔ"
+            }
+          ]
+        },
+        {
+          "p": "chù",
+          "meaning": "地方、处所",
+          "words": [
+            {
+              "w": "到处",
+              "p": "dào chù"
+            },
+            {
+              "w": "住处",
+              "p": "zhù chù"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
