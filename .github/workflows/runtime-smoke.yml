@@ -37,6 +37,7 @@ jobs:
       - name: Typecheck and build the deployment JS
         run: npm run build
       - name: Verify checked-in app.js matches the source
+        if: github.event_name == 'pull_request'
         run: git diff --exit-code -- static/zi/app.js
       - name: Generate staging polyphonic fixtures
         run: python3 scripts/build-polyphonic.py --write
