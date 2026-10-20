@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Validate polyphonic editorial content and produce optional static data overlays.
 
-No external dictionary is required for validation / --write. Automatic dictionary
-candidate discovery is audit-only: it NEVER publishes unreviewed meanings.
+Pinned Unicode-derived pinyin source snapshots are in sources/. The merged
+source is audit-only; modern reference-backed readings feed the index.
 
 Usage:
   python3 scripts/build-polyphonic.py --validate
-  python3 scripts/build-polyphonic.py --audit-dictionary ../minimaxi/Data/dictionary.txt
+  python3 scripts/build-polyphonic.py --audit
+  python3 scripts/build-polyphonic.py --write-audit
+  python3 scripts/build-polyphonic.py --check-audit
   python3 scripts/build-polyphonic.py --write
   python3 scripts/build-polyphonic.py --check
 """
@@ -90,26 +92,154 @@ def validate() -> dict:
           f"{sum(x['status']=='draft' for x in entries.values())} editorial drafts.")
     return entries
 
+
+# Pinned data: mozillazg/pinyin-data v0.15.0 (MIT plus Unicode Terms of Use).
+PINNED = ROOT / "sources" / "pinyin-data-v0.15.0"
+MERGED = PINNED / "pinyin.txt"
+STANDARD = PINNED / "kTGHZ2013.txt"
+AUDIT_DIR = ROOT / "reports"
+CODEPOINT = re.compile(r"^U\+([0-9A-Fa-f]{4,6}):\s*([^#]*)")
+
+
+def parse_reading_source(path: Path) -> dict[str, list[str]]:
+    """Parse code point lines into de-duplicated, tone-marked Hanyu Pinyin."""
+    result = {}
+    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        match = CODEPOINT.match(line)
+        if match is None:
+            raise ValueError(f"{path.name}:{number}: malformed row")
+        char = chr(int(match[1], 16))
+        raw = [canonical_pinyin(p) for p in match[2].split(",") if p.strip()]
+        result[char] = list(dict.fromkeys(raw))
+    return result
+
+
+def audited_index(entries: dict, table: dict) -> tuple[dict, dict]:
+    """Inventory all candidates; index only source-backed modern readings.
+
+    Merged pinyin.txt has rare, historical and specialised variants (candidates
+    only). kTGHZ2013 is a modern dictionary reading reference. It is not a
+    substitute for editorial review of each child-facing meaning and example.
+    """
+    merged = parse_reading_source(MERGED)
+    standard = parse_reading_source(STANDARD)
+    indexed, candidates, legacy_mismatches = {}, {}, {}
+    for char, record in table.items():
+        suggested = merged.get(char, [])
+        reference = standard.get(char, [])
+        curated = entries.get(char)
+        editorial = curated["status"] if curated else "none"
+        confirmed = [item["p"] for item in curated["readings"]] if editorial == "approved" else []
+        reference_multi = len(reference) > 1
+        if reference_multi:
+            indexed[char] = list(dict.fromkeys(confirmed + reference))
+        elif confirmed:
+            indexed[char] = list(dict.fromkeys(confirmed))
+        if len(suggested) > 1 or reference_multi:
+            candidates[char] = {
+                "candidateReadings": suggested,
+                "referenceReadings": reference,
+                "status": "reference" if reference_multi else "needs-review",
+                "editorial": editorial,
+            }
+        if char in indexed and len(indexed[char]) > 1:
+            legacy = canonical_pinyin(record.get("p", ""))
+            if legacy and legacy not in indexed[char]:
+                legacy_mismatches[char] = {
+                    "legacy": legacy, "reference": indexed[char],
+                }
+    counts = {
+        "dictionaryCharacters": len(table),
+        "mergedSourceCharacters": sum(ch in merged for ch in table),
+        "referenceSourceCharacters": sum(ch in standard for ch in table),
+        "multiReadingCandidates": sum(len(merged.get(ch, [])) > 1 for ch in table),
+        "referenceMultiReadingCharacters": sum(len(standard.get(ch, [])) > 1 for ch in table),
+        "indexedMultiReadingCharacters": sum(len(ps) > 1 for ps in indexed.values()),
+        "needsReviewCandidates": sum(item["status"] == "needs-review" for item in candidates.values()),
+        "editoriallyApprovedCharacters": sum(x["status"] == "approved" for x in entries.values()),
+        "legacyPrimaryOutsideIndex": len(legacy_mismatches),
+    }
+    return indexed, {
+        "schemaVersion": 1,
+        "source": {
+            "project": "mozillazg/pinyin-data",
+            "version": "v0.15.0",
+            "reference": "kTGHZ2013.txt",
+            "candidate": "pinyin.txt",
+            "warning": "Merged readings include rare/historical variants; not verified for teaching.",
+        },
+        "summary": counts,
+        "characters": candidates,
+        "legacyPrimaryOutsideIndex": legacy_mismatches,
+    }
+
+
 def render(entries: dict) -> tuple[str, str]:
     table = json.loads((DATA / "characters.json").read_text(encoding="utf-8"))
+    indexed, _audit = audited_index(entries, table)
     approved = {}
+    # Make --write and --check idempotent (strip any prior generated ps).
+    for record in table.values():
+        record.pop("ps", None)
+    for char, readings in indexed.items():
+        if len(readings) > 1:
+            table[char]["ps"] = readings
     for char, entry in entries.items():
         if entry["status"] != "approved":
             continue
         if char not in table:
             raise ValueError(f"Missing dictionary character {char}")
-        readings = [item["p"] for item in entry["readings"]]
-        table[char]["ps"] = readings
-        # The old single pinyin + mixed English definition are preserved for
-        # backward compatibility. New views must never treat d as sense-specific.
+        # Legacy p and mixed d remain for compatibility but must never
+        # be interpreted as a per-reading definition by the new UI.
         approved[char] = {"readings": entry["readings"]}
     return (
         json.dumps(table, ensure_ascii=False, separators=(",", ":")) + "\n",
         json.dumps(approved, ensure_ascii=False, separators=(",", ":")) + "\n",
     )
 
+
+def render_audit(entries: dict) -> tuple[str, str]:
+    table = json.loads((DATA / "characters.json").read_text(encoding="utf-8"))
+    _indexed, audit = audited_index(entries, table)
+    counts = audit["summary"]
+    data = json.dumps(audit, ensure_ascii=False, indent=2) + "\n"
+    lines = [
+        "# Polyphonic pronunciation inventory",
+        "",
+        "Source: mozillazg/pinyin-data v0.15.0",
+        "(https://github.com/mozillazg/pinyin-data/tree/v0.15.0).",
+        "Candidate source: pinyin.txt. Modern dictionary reference: kTGHZ2013.txt.",
+        "",
+        "Counts refer only to existing Write It characters, not all Hanzi.",
+        "Merged candidate pronunciations may include historical, rare or",
+        "specialised readings and must not be auto-published.",
+        "",
+        "| Metric | Count |",
+        "| --- | ---: |",
+    ]
+    for name, value in counts.items():
+        lines.append(f"| {name} | {value} |")
+    lines += [
+        "",
+        "The complete per-character inventory with both source readings and",
+        "status flags is in polyphonic-audit.json.",
+        "",
+        "reference = modern-dictionary reference has multiple readings.",
+        "needs-review = variant appears in merged source only.",
+        "editorial = separate reviewed child-friendly meaning/example status.",
+        "",
+        "Only reference-backed multiple readings and separately approved",
+        "editorial overrides are copied to characters.json.ps.",
+        "The merged-only candidates stay in this audit report.",
+        "",
+    ]
+    return data, "\n".join(lines)
+
+
 def audit_dictionary(path: Path, entries: dict) -> None:
-    """Report all raw alternative pronunciations without treating them as verified."""
+    """Compare legacy Make Me a Hanzi raw source (NOT a complete index)."""
     candidates = {}
     with path.open(encoding="utf-8") as stream:
         for line in stream:
@@ -120,19 +250,29 @@ def audit_dictionary(path: Path, entries: dict) -> None:
             raw = row.get("pinyin") or []
             if isinstance(raw, str):
                 raw = [raw]
-            deduped = list(dict.fromkeys(canonical_pinyin(p) for p in raw if p.strip()))
-            if len(deduped) > 1:
-                candidates[char] = deduped
-    not_curated = {c: v for c, v in candidates.items() if c not in entries}
-    print(f"Raw dictionary contains {len(candidates)} multi-reading candidates; "
-          f"{len(not_curated)} not yet in editorial queue.")
-    print("Examples (UNREVIEWED): " +
-          ", ".join(f"{c}: {'/'.join(ps)}" for c, ps in list(not_curated.items())[:20]))
+            unique = list(dict.fromkeys(canonical_pinyin(p) for p in raw if p.strip()))
+            if len(unique) > 1:
+                candidates[char] = unique
+    print(f"Legacy source has {len(candidates)} explicit multiple-readings only.")
+
+
+def verify_or_write(files: dict[Path, str], write: bool) -> None:
+    for path, content in files.items():
+        if write:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content, encoding="utf-8")
+            print(f"Wrote {path.relative_to(ROOT)}")
+        elif not path.exists() or path.read_text(encoding="utf-8") != content:
+            sys.exit(f"Generated file out of date: {path.relative_to(ROOT)}")
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--validate", action="store_true")
+    group.add_argument("--audit", action="store_true")
+    group.add_argument("--write-audit", action="store_true")
+    group.add_argument("--check-audit", action="store_true")
     group.add_argument("--write", action="store_true")
     group.add_argument("--check", action="store_true")
     group.add_argument("--audit-dictionary", type=Path)
@@ -140,15 +280,22 @@ def main() -> None:
     entries = validate()
     if args.audit_dictionary:
         audit_dictionary(args.audit_dictionary, entries)
+    if args.audit or args.write_audit or args.check_audit:
+        audit_json, audit_markdown = render_audit(entries)
+        if args.audit:
+            print(json.dumps(json.loads(audit_json)["summary"], ensure_ascii=False, indent=2))
+        else:
+            verify_or_write({
+                AUDIT_DIR / "polyphonic-audit.json": audit_json,
+                AUDIT_DIR / "polyphonic-audit.md": audit_markdown,
+            }, write=args.write_audit)
     if args.write or args.check:
         characters, polyphonic = render(entries)
-        files = {DATA / "characters.json": characters, DATA / "polyphonic.json": polyphonic}
-        for path, content in files.items():
-            if args.write:
-                path.write_text(content, encoding="utf-8")
-                print(f"Wrote {path.relative_to(ROOT)}")
-            elif not path.exists() or path.read_text(encoding="utf-8") != content:
-                sys.exit(f"Generated data out of date: {path.relative_to(ROOT)}")
+        verify_or_write({
+            DATA / "characters.json": characters,
+            DATA / "polyphonic.json": polyphonic,
+        }, write=args.write)
+
 
 if __name__ == "__main__":
     main()
