@@ -4,12 +4,13 @@ on:
   push:
     branches:
       - main
-      - feat/polyphonic-data-foundation
   pull_request:
     paths:
       - ".github/workflows/runtime-smoke.yml"
       - "src/**"
       - "content/**"
+      - "sources/**"
+      - "reports/**"
       - "scripts/build-polyphonic.py"
       - "scripts/build-data.py"
       - "tests/**"
@@ -19,7 +20,7 @@ on:
       - "playwright.config.mjs"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   smoke:
@@ -32,18 +33,8 @@ jobs:
           cache: npm
       - name: Validate polyphonic data
         run: python3 -m unittest discover -s tests -p 'test_polyphonic.py'
-      - name: Produce pinned full-corpus inventory
-        run: python3 scripts/build-polyphonic.py --write-audit
-      - name: Commit full-corpus audit to review branch
-        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/polyphonic-data-foundation'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reports/polyphonic-audit.json reports/polyphonic-audit.md
-          if ! git diff --cached --quiet; then
-            git commit -m "data: snapshot full pronunciation audit [skip ci]"
-            git push origin HEAD:"$GITHUB_REF_NAME"
-          fi
+      - name: Verify full-corpus report is reproducible
+        run: python3 scripts/build-polyphonic.py --check-audit
       - name: Install locked dependencies
         run: npm ci
       - name: Typecheck and build the deployment JS
