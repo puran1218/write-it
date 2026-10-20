@@ -39,13 +39,22 @@ test("both chang and zhang find the same character, with matching readings", asy
   }
 });
 
-test("unreviewed candidates and single-reading characters keep the old view", async ({ page }) => {
+test("uncurated reference readings are visible without invented meanings", async ({ page }) => {
   await page.goto("./?local-data#/detail/好");
-  await expect(page.locator(".polyphonic-tab")).toHaveCount(0);
-  await expect(page.locator(".hero-pinyin")).toHaveText("hǎo");
+  await expect(page.locator(".polyphonic-tab")).toHaveCount(2);
+  await expect(page.locator(".hero-pinyin")).toContainText("hǎo · hào");
+  await expect(page.locator(".polyphonic-panel")).toContainText("例词还在整理中");
+  await page.getByRole("tab", { name: "hào" }).click();
+  await expect(page.locator(".polyphonic-panel")).toContainText("例词还在整理中");
   await page.goto("./?local-data#/detail/花");
   await expect(page.locator(".polyphonic-tab")).toHaveCount(0);
   await expect(page.locator('[data-action="strokes"]')).toBeVisible();
+});
+
+test("historical merged-only readings are not mistakenly indexed", async ({ page }) => {
+  await page.goto("./?local-data#/detail/重");
+  await expect(page.locator(".hero-pinyin")).toContainText("chóng");
+  await expect(page.locator(".hero-pinyin")).not.toContainText("tóng");
 });
 
 test("direct character search lists the two readings without downloading stroke packs", async ({ page }) => {
