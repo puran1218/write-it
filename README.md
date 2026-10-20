@@ -99,12 +99,19 @@ npm run serve    # http://localhost:8765/zi/
 
 ## Polyphonic characters / 多音字
 
-The initial versioned dataset contains five approved reading groups
-(缝、长、行、重、乐) and preserves the existing search coverage.
-A further 25 common-character entries are explicit **editorial drafts**,
-excluded from production until the examples and readings are reviewed.
+The v2 dataset contains **582 reference-backed multi-reading characters**
+from a pinned modern dictionary source. A broader inventory identifies
+**3,459** multi-reading candidates within the existing 9,565-character corpus.
+The remaining **2,877 merged-source-only candidates** are kept out of the
+public pronunciation index pending review.
 
-- `characters.json.ps`: vetted pronunciation variants available to search;
+Only **five characters** (缝、长、行、重、乐) have complete, individually
+reviewed child-friendly meaning and example-word groups in this first release;
+another 25 editorial drafts are excluded from the teaching data. Other
+reference-backed polyphonic entries display their known readings with a clear
+"examples are being prepared" fallback instead of made-up explanations.
+
+- `characters.json.ps`: source-backed alternative readings available to search;
   `p` remains the legacy field.
 - `polyphonic.json`: small, optional, child-facing meanings and grouped words,
   fetched only on detail screens.
