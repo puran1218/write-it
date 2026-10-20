@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - feat/polyphonic-data-v2-release
   pull_request:
     paths:
       - ".github/workflows/runtime-smoke.yml"
@@ -21,7 +20,7 @@ on:
       - "playwright.config.mjs"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   smoke:
@@ -34,11 +33,7 @@ jobs:
           cache: npm
       - name: Validate polyphonic data
         run: python3 -m unittest discover -s tests -p 'test_polyphonic.py'
-      - name: Write updated data-v2 index
-        if: github.event_name == 'push'
-        run: python3 scripts/build-polyphonic.py --write
       - name: Verify committed data-v2 snapshot
-        if: github.event_name == 'pull_request'
         run: python3 scripts/build-polyphonic.py --check
       - name: Verify complete pronunciation inventory
         run: python3 scripts/build-polyphonic.py --check-audit
@@ -49,19 +44,8 @@ jobs:
       - name: Verify checked-in app.js matches the source
         run: git diff --exit-code -- static/zi/app.js
       - name: Verify no generated data changes
-        if: github.event_name == 'pull_request'
         run: git diff --exit-code -- static/zi/data/characters.json static/zi/data/polyphonic.json
       - name: Install test browser
         run: npx playwright install --with-deps chromium
       - name: Run isolated PWA smoke suite
         run: npm run test:smoke
-      - name: Commit regenerated multi-reading index
-        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/polyphonic-data-v2-release'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add static/zi/data/characters.json static/zi/data/polyphonic.json
-          if ! git diff --cached --quiet; then
-            git commit -m "data: refresh full reference-backed reading index [skip ci]"
-            git push origin HEAD:"$GITHUB_REF_NAME"
-          fi
