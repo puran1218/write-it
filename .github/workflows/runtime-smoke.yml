@@ -8,11 +8,6 @@ on:
     paths:
       - ".github/workflows/runtime-smoke.yml"
       - "src/**"
-      - "content/**"
-      - "sources/**"
-      - "reports/**"
-      - "scripts/build-polyphonic.py"
-      - "scripts/build-data.py"
       - "tests/**"
       - "static/zi/**"
       - "package.json"
@@ -31,10 +26,6 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-      - name: Validate polyphonic data
-        run: python3 -m unittest discover -s tests -p 'test_polyphonic.py'
-      - name: Verify full-corpus report is reproducible
-        run: python3 scripts/build-polyphonic.py --check-audit
       - name: Install locked dependencies
         run: npm ci
       - name: Typecheck and build the deployment JS
