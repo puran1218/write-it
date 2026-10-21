@@ -1,8 +1,8 @@
 // Write It PWA: own cache namespace only; do not delete another app's CacheStorage.
-const SHELL_CACHE = "zi-shell-v5";
-const DATA_CACHE = "zi-data-v1";
+const SHELL_CACHE = "zi-shell-v6";
+const DATA_CACHE = "zi-data-v2";
 const DATA_URL_PREFIX =
-  "https://cdn.jsdelivr.net/gh/puran1218/write-it@data-v1/static/zi/data/";
+  "https://cdn.jsdelivr.net/gh/puran1218/write-it@data-v2/static/zi/data/";
 
 const SHELL_ASSETS = [
   "./",

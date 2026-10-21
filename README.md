@@ -97,6 +97,45 @@ npm run serve    # http://localhost:8765/zi/
 注意：必须通过 `/zi/` 子路径访问，模拟 Micro.blog 部署路径。
 改代码用 `npm run watch` 配合 `npm run serve`。
 
+## Polyphonic characters / 多音字
+
+The v2 dataset contains **582 reference-backed multi-reading characters**
+from a pinned modern dictionary source. A broader inventory identifies
+**3,459** multi-reading candidates within the existing 9,565-character corpus.
+The remaining **2,877 merged-source-only candidates** are kept out of the
+public pronunciation index pending review.
+
+Only **five characters** (缝、长、行、重、乐) have complete, individually
+reviewed child-friendly meaning and example-word groups in this first release;
+another 25 editorial drafts are excluded from the teaching data. Other
+reference-backed polyphonic entries display their known readings with a clear
+"examples are being prepared" fallback instead of made-up explanations.
+
+- `characters.json.ps`: source-backed alternative readings available to search;
+  `p` remains the legacy field.
+- `polyphonic.json`: small, optional, child-facing meanings and grouped words,
+  fetched only on detail screens.
+- Unreviewed variants from external dictionaries are audit candidates, never
+  automatically published.
+- A separate [editorial guide](docs/polyphonic-data.md) documents validation.
+
+To regenerate just the approved polyphonic overlay without the private iOS
+source dataset, run `python3 scripts/build-polyphonic.py --write`, then
+`python3 scripts/build-polyphonic.py --check`. Both generated files must
+be reviewed and committed together. This command does not rebuild the
+unchanged 24 stroke packs.
+
+### data-v2 release gate
+
+The code in this branch points at `@data-v2`. The **immutable Git tag**
+must exist on a verified source commit containing `polyphonic.json` and the
+new `ps` indices before shipping the corresponding Micro.blog deployment.
+Do not create a tag on an unreviewed commit or retarget it after publication.
+After merging source changes, tag and push the exact verified commit, verify
+the jsDelivr `data-v2` URLs return the new files, and only then publish the
+deployment-shell version. Until those steps, existing installed clients
+should remain on `data-v1`.
+
 ## Browser smoke tests
 
 Run the smoke suite against the local `/zi/` static app using **Playwright Chromium**.
@@ -121,14 +160,14 @@ not a complete mobile-device compatibility matrix.
 
 - **puran1218/write-it**（本仓库）：源码 + 静态数据（source of truth）。
   数据不在 micro.blog 插件仓库里，而是经 jsDelivr 按版本 tag 分发
-  （`src/data-url.ts` 的 `DATA_BASE_URL` 指向 `@data-v1`）。
+  （`src/data-url.ts` 的 `DATA_BASE_URL` 指向 `@data-v2`）。
 - **puran1218/write-it-microblog**：轻部署壳——`plugin.json` + `static/zi/`
   的 index/app/styles/Service Worker/图标（不含 `data/`，几百 KB），
   micro.blog 克隆并发布的是它，访问路径 `/zi/`。
 
 发布/更新流程（数据版本与插件版本彼此独立）：
 
-1. **仅改 TypeScript/CSS/UI**：运行 `npm ci && npm run build`，无需重新生成 36 MB 数据，也无需升级 `data-v1`。
+1. **仅改 TypeScript/CSS/UI**：运行 `npm ci && npm run build`，无需重新生成 36 MB 数据，也无需升级 `data-v2`。
 2. **数据发生变化时**：运行 `npm ci && npm run data`，验证新数据，提交包含数据的 Git commit；
    **在提交之后**创建并推送新的不可变 tag（如 `data-v2`）。
 3. 将 `src/data-url.ts` 中的 CDN tag 改为新数据 tag，同时升级
@@ -145,7 +184,7 @@ not a complete mobile-device compatibility matrix.
 当更新 Service Worker 本身时，升级 `SHELL_CACHE`，使新缓存世代与旧版本区分。
 
 离线是**渐进式**的：壳安装后立即可离线；基础字典首次加载后缓存；
-笔顺分包、手写索引首次使用后缓存（数据缓存为 `zi-data-v1`，
+笔顺分包、手写索引首次使用后缓存（数据缓存为 `zi-data-v2`，
 cache-first——数据跟不可变 tag 走）。本地调试想用 `static/zi/data`
 的本地数据：页面 URL 加 `?local-data`。
 
