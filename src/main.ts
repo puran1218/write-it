@@ -34,7 +34,7 @@ function render(): void {
       void renderHandwrite(appRoot, isCurrent);
       break;
     case "detail":
-      void renderDetail(appRoot, route.character, library, isCurrent);
+      void renderDetail(appRoot, route.character, library, isCurrent, route.reading);
       break;
     case "strokes":
       void renderWriting(appRoot, route.character, "demo", library, isCurrent);

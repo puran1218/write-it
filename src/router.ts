@@ -5,7 +5,7 @@ export type Route =
   | { screen: "book" }
   | { screen: "search" }
   | { screen: "handwrite" }
-  | { screen: "detail"; character: string }
+  | { screen: "detail"; character: string; reading?: string }
   | { screen: "strokes"; character: string }
   | { screen: "practice"; character: string };
 
@@ -24,7 +24,7 @@ export function parseHash(): Route {
       return { screen: "handwrite" };
     case "detail":
       return segments[1]
-        ? { screen: "detail", character: segments[1] }
+        ? { screen: "detail", character: segments[1], reading: segments[2] }
         : { screen: "home" };
     case "strokes":
       return segments[1]
@@ -50,7 +50,7 @@ export function toHash(route: Route): string {
     case "handwrite":
       return "#/handwrite";
     case "detail":
-      return `#/detail/${encodeURI(route.character)}`;
+      return `#/detail/${encodeURI(route.character)}${route.reading ? `/${encodeURI(route.reading)}` : ""}`;
     case "strokes":
       return `#/strokes/${encodeURI(route.character)}`;
     case "practice":

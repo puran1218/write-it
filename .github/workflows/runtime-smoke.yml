@@ -33,7 +33,7 @@ jobs:
           cache: npm
       - name: Validate polyphonic data
         run: python3 -m unittest discover -s tests -p 'test_polyphonic.py'
-      - name: Verify full-corpus report is reproducible
+      - name: Verify complete pronunciation inventory
         run: python3 scripts/build-polyphonic.py --check-audit
       - name: Install locked dependencies
         run: npm ci
@@ -41,6 +41,8 @@ jobs:
         run: npm run build
       - name: Verify checked-in app.js matches the source
         run: git diff --exit-code -- static/zi/app.js
+      - name: Generate staging polyphonic fixtures
+        run: python3 scripts/build-polyphonic.py --write
       - name: Install test browser
         run: npx playwright install --with-deps chromium
       - name: Run isolated PWA smoke suite

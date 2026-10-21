@@ -7,6 +7,7 @@ import type {
   StrokeSegment,
   Supplement,
   WordItem,
+  PolyphonicReading,
 } from "./types";
 
 /** 数据源：CDN（jsDelivr @data-v1）或本地（?local-data 调试），见 data-url.ts。 */
@@ -37,7 +38,7 @@ function retryable<T>(load: () => Promise<T>): () => Promise<T> {
 
 type CharacterTable = Record<
   string,
-  { p: string; d?: string; sc?: number; r?: string; st?: string; c?: string[] }
+  { p: string; ps?: string[]; d?: string; sc?: number; r?: string; st?: string; c?: string[] }
 >;
 
 const characters = retryable(() => loadJson<CharacterTable>("characters.json"));
@@ -47,6 +48,16 @@ const supplements = retryable(() => loadJson<Record<string, Supplement>>("supple
 const curriculum = retryable(async () =>
   (await loadJson<{ order: string[] }>("curriculum.json")).order
 );
+
+type PolyphonicTable = Record<string, { readings: PolyphonicReading[] }>;
+const reviewedReadings = retryable(async (): Promise<PolyphonicTable> => {
+  const response = await fetch(dataUrl("polyphonic.json"));
+  // Old data-v1 installations do not have this optional file.
+  if (response.status === 404) return {};
+  if (!response.ok) throw new Error(`Failed to load polyphonic data: ${response.status}`);
+  return (await response.json()) as PolyphonicTable;
+});
+
 
 // ---------------------------------------------------------------------------
 // Stroke files（按分包懒加载：manifest 记录 字 → 分包，包内按字取数据）
@@ -126,10 +137,18 @@ export async function lookup(character: string): Promise<CharacterInfo> {
 
   const entry = table[character];
   const supplement = supplementMap[character] ?? null;
+  const pronunciations = entry?.ps?.length ? entry.ps : [entry?.p || `${character}0`];
+  // Fetch reviewed senses only for a recognized multi-reading entry. The
+  // combined legacy English definition is never assigned to one reading.
+  const readings = pronunciations.length > 1
+    ? (await reviewedReadings())[character]?.readings ?? []
+    : [];
 
   return {
     character,
     pinyin: entry?.p || `${character}0`,
+    pronunciations,
+    readings,
     definition: entry?.d ?? null,
     radical: supplement?.r ?? entry?.r ?? null,
     structure: supplement?.st ?? entry?.st ?? null,
@@ -146,7 +165,9 @@ export async function lookup(character: string): Promise<CharacterInfo> {
 /** Search preview needs only the small character table, never a stroke pack. */
 export async function lookupPreview(character: string): Promise<CharacterPreview | null> {
   const entry = (await characters())[character];
-  return entry?.p ? { character, pinyin: entry.p } : null;
+  return entry?.p
+    ? { character, pinyin: entry.p, pronunciations: entry.ps ?? [entry.p] }
+    : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -180,21 +201,26 @@ function foldPinyin(pinyin: string): string {
     .toLowerCase();
 }
 
-/** Pinyin prefix search ("hua" → 花 画 化…), capped like the iOS app. */
+/** Pinyin prefix search; tone digits/marks disambiguate reviewed readings.
+ * Unmarked queries match any documented reading without duplicate characters. */
 export async function searchByPinyin(query: string): Promise<CharacterPreview[]> {
   const cleaned = foldPinyin(query);
-  if (!cleaned) {
-    return [];
-  }
+  if (!cleaned) return [];
 
+  const toned = /[1-5āáǎàōóǒòēéěěèīíǐìūúǔùǖǘǚǜ]/i.test(query);
+  const normalized = displayPinyin(query).toLowerCase().normalize("NFC");
   const table = await characters();
   const results: CharacterPreview[] = [];
   for (const [character, entry] of Object.entries(table)) {
-    if (foldPinyin(entry.p).startsWith(cleaned)) {
-      results.push({ character, pinyin: entry.p });
-      if (results.length >= 12) {
-        break;
-      }
+    const pronunciations = entry.ps?.length ? entry.ps : [entry.p];
+    const matching = pronunciations.find(p =>
+      toned
+        ? displayPinyin(p).toLowerCase().normalize("NFC").startsWith(normalized)
+        : foldPinyin(p).startsWith(cleaned)
+    );
+    if (matching) {
+      results.push({ character, pinyin: matching, pronunciations });
+      if (results.length >= 12) break;
     }
   }
   return results;
