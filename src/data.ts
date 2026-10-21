@@ -10,7 +10,7 @@ import type {
   PolyphonicReading,
 } from "./types";
 
-/** 数据源：CDN（jsDelivr @data-v1）或本地（?local-data 调试），见 data-url.ts。 */
+/** 数据源：CDN（jsDelivr @data-v2）或本地（?local-data 调试），见 data-url.ts。 */
 import { dataUrl } from "./data-url";
 
 async function loadJson<T>(relativePath: string): Promise<T> {
@@ -52,7 +52,7 @@ const curriculum = retryable(async () =>
 type PolyphonicTable = Record<string, { readings: PolyphonicReading[] }>;
 const reviewedReadings = retryable(async (): Promise<PolyphonicTable> => {
   const response = await fetch(dataUrl("polyphonic.json"));
-  // Old data-v1 installations do not have this optional file.
+  // Older data-v1 installations do not have this optional file.
   if (response.status === 404) return {};
   if (!response.ok) throw new Error(`Failed to load polyphonic data: ${response.status}`);
   return (await response.json()) as PolyphonicTable;
