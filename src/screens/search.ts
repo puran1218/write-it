@@ -104,7 +104,7 @@ export async function renderSearch(root: HTMLElement, isCurrent: () => boolean):
     input.focus();
   });
 
-  function showPreviews(previews: CharacterPreview[]): void {
+  function showPreviews(previews: CharacterPreview[], queryIsPinyin = false): void {
     if (!isCurrent()) return;
     if (previews.length === 0) {
       results.innerHTML = "";
@@ -115,15 +115,15 @@ export async function renderSearch(root: HTMLElement, isCurrent: () => boolean):
     results.innerHTML = previews
       .map(
         (preview) => `
-        <button class="search-result" data-character="${esc(preview.character)}">
+        <button class="search-result" data-character="${esc(preview.character)}"\n                data-reading="${queryIsPinyin ? esc(preview.pinyin) : ""}">
           <span class="result-char">${esc(preview.character)}</span>
-          <span class="result-pinyin">${esc(displayPinyin(preview.pinyin))}</span>
+          <span class="result-pinyin">${esc((queryIsPinyin ? [preview.pinyin] : preview.pronunciations ?? [preview.pinyin]).map(displayPinyin).join(" · "))}</span>
         </button>`
       )
       .join("");
     for (const button of results.querySelectorAll<HTMLButtonElement>(".search-result")) {
       button.addEventListener("click", () => {
-        navigate({ screen: "detail", character: button.dataset.character ?? "" });
+        navigate({ screen: "detail", character: button.dataset.character ?? "", reading: button.dataset.reading || undefined });
       });
     }
   }
@@ -155,7 +155,7 @@ export async function renderSearch(root: HTMLElement, isCurrent: () => boolean):
       } else {
         const previews = await searchByPinyin(query);
         if (id !== searchRunId || !isCurrent()) return;
-        showPreviews(previews);
+        showPreviews(previews, true);
       }
     } catch {
       if (id !== searchRunId || !isCurrent()) return;

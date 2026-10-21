@@ -14,7 +14,7 @@ async function fixtureJson(relativePath) {
 }
 
 async function routeData(page, intercept = null) {
-  await page.route("https://cdn.jsdelivr.net/gh/puran1218/write-it@data-v1/**", async route => {
+  await page.route("https://cdn.jsdelivr.net/gh/puran1218/write-it@data-v2/**", async route => {
     const url = route.request().url();
     const index = url.indexOf(CDN_DATA_MARKER);
     if (index < 0) throw new Error("Unexpected CDN path: " + url);

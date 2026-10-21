@@ -1103,3 +1103,32 @@ button {
   stroke-width: 3;
   stroke-linecap: round;
 }
+
+/* Polyphonic reading groups: keep the existing detail-card visual language. */
+.polyphonic-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.polyphonic-tab {
+  cursor: pointer;
+  border: 1.5px solid var(--sky-blue);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--outline);
+  font: inherit;
+  font-weight: 700;
+  padding: 8px 16px;
+  min-height: 44px;
+}
+.polyphonic-tab[aria-selected="true"] {
+  background: var(--sky-blue);
+}
+.polyphonic-tab:focus-visible {
+  outline: 3px solid var(--outline);
+  outline-offset: 3px;
+}
+.polyphonic-panel .learning-line {
+  margin-bottom: 12px;
+}
