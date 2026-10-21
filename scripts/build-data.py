@@ -8,7 +8,6 @@ Usage: python3 scripts/build-data.py [path-to-minimaxi-repo]
 import json
 import shutil
 import sqlite3
-import subprocess
 import sys
 from pathlib import Path
 
@@ -251,13 +250,6 @@ def main() -> None:
     if not hw_data_dir.is_dir():
         sys.exit("hanzi-writer-data missing — run: npm install")
     convert_strokes(hw_data_dir)
-
-    # Restore the editorial polyphonic overlay after regenerating characters.json.
-    # This does not turn raw dictionary guesses into published meanings.
-    subprocess.run(
-        [sys.executable, str(REPO_ROOT / "scripts" / "build-polyphonic.py"), "--write"],
-        check=True,
-    )
 
 
 if __name__ == "__main__":

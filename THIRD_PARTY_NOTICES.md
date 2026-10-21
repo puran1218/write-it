@@ -8,7 +8,7 @@ any license the author chooses for Write It's own TypeScript/CSS/UI code.
 | --- | --- | --- |
 | [Hanzi Writer](https://github.com/chanind/hanzi-writer) | JS animations and stroke-practice implementation | MIT, reproduced in [licenses/HANZI-WRITER-MIT.txt](licenses/HANZI-WRITER-MIT.txt) |
 | [hanzi-writer-data](https://github.com/chanind/hanzi-writer-data) / [Make Me a Hanzi](https://github.com/skishore/makemeahanzi) graphical data | Stroke vectors, medians, handwriting-related geometry | Arphic Public License, reproduced in [licenses/ARPHICPL.TXT](licenses/ARPHICPL.TXT) |
-| [Make Me a Hanzi dictionary.txt](https://github.com/skishore/makemeahanzi) | Supplemental pronunciations, definitions, radicals, IDS decomposition | LGPL v3 or later, with source notices in [licenses/MAKEMEAHANZI-LGPL.txt](licenses/MAKEMEAHANZI-LGPL.txt) |\n| [mozillazg/pinyin-data](https://github.com/mozillazg/pinyin-data/tree/v0.15.0) | Pinned merged pronunciation candidates and kTGHZ2013 reference-based pronunciations for the multi-reading index | MIT text copied at [sources/pinyin-data-v0.15.0/LICENSE](sources/pinyin-data-v0.15.0/LICENSE). The underlying Unicode/Unihan readings are also subject to the [Unicode Terms of Use](https://www.unicode.org/copyright.html). Source version v0.15.0, original blob IDs documented in the data guide. |
+| [Make Me a Hanzi dictionary.txt](https://github.com/skishore/makemeahanzi) | Supplemental pronunciations, definitions, radicals, IDS decomposition | LGPL v3 or later, with source notices in [licenses/MAKEMEAHANZI-LGPL.txt](licenses/MAKEMEAHANZI-LGPL.txt) |
 
 Source license references:
 - [Make Me a Hanzi COPYING](https://github.com/skishore/makemeahanzi/blob/master/COPYING)
